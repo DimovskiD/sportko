@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "671443258636",
+    "firebase_url": "https://sportko-837c1.firebaseio.com",
+    "project_id": "sportko-837c1",
+    "storage_bucket": "sportko-837c1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671443258636:android:dfddb37b17c486df",
+        "android_client_info": {
+          "package_name": "com.dimovski.sportko"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671443258636-ev2rc8o2p04at6p9855qal21ac86l54d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dimovski.sportko",
+            "certificate_hash": "b9eff65512cc314e0d38daf1d9a161faab3694a8"
+          }
+        },
+        {
+          "client_id": "671443258636-65qjr629msblut5ddkmtpj8k63r7ssrh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEUPt_esTuoXoR8ahOaZ3P7yx4cDb79Ps"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671443258636-65qjr629msblut5ddkmtpj8k63r7ssrh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
