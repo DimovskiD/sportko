@@ -53,11 +53,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             startListActivity();
     }
 
-    private void startListActivity() {
-        Intent i = new Intent(this,ListActivity.class);
-        startActivity(i);
-        this.finish();
-    }
+
 
     @Override
     public void onClick(View v) {
@@ -71,10 +67,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-    private void startRegisterActivity() {
-        Intent startActivity = new Intent(this,RegisterActivity.class);
-        startActivity(startActivity);
-    }
+
 
     private void validateLoginDetails() {
 

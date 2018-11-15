@@ -77,6 +77,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
             case R.id.List:
                 break;
             case R.id.myEvents:
+
                 break;
             case R.id.settings:
                 break;

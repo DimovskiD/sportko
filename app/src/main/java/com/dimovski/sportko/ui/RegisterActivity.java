@@ -12,17 +12,24 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.db.model.User;
+import com.dimovski.sportko.db.repository.FirebaseRepository;
 import com.dimovski.sportko.utils.StringUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 
 public class RegisterActivity extends BaseActivity implements View.OnClickListener {
 
     private FirebaseAuth authentication;
+    private FirebaseRepository repo;
+
     private Unbinder unbinder;
+
 
     @BindView(R.id.back_to_login)
     Button login;
@@ -41,6 +48,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         authentication = FirebaseAuth.getInstance();
         signup.setOnClickListener(this);
         login.setOnClickListener(this);
+
+        repo = new FirebaseRepository();
 
     }
 
@@ -77,11 +86,12 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                         // Sign in success, update UI with the signed-in user's information
                         Log.d("CREATE_ACC", "createUserWithEmail:success");
                         FirebaseUser user = authentication.getCurrentUser();
-//                    updateUI(user);
+                        repo.insertUser(new User(user.getEmail()));
+                        startListActivity();
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w("CREATE_ACC", "createUserWithEmail:failure", task.getException());
-                        Toast.makeText(RegisterActivity.this, "Account not created. Please try again.",
+                        Toast.makeText(RegisterActivity.this, task.getException().getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
