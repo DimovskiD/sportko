@@ -1,10 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.RegisterActivity">
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
 
-</android.support.constraint.ConstraintLayout>
+    <ScrollView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/containerRegister"
+                android:layout_centerInParent="true"
+
+    >
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+
+            <android.support.design.widget.TextInputLayout
+                    android:id="@+id/etEmailLayoutRegister"
+                    app:boxStrokeColor="@android:color/white"
+                    android:layout_width="match_parent"
+                    android:textColorHint="@android:color/white"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                        android:id="@+id/input_email_register"
+                        android:layout_width="match_parent"
+                        android:textColorHint="@android:color/white"
+                        android:textColor="@color/white"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/email"
+                        android:inputType="textEmailAddress" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                    android:id="@+id/passwordLayoutRegister"
+                    app:boxStrokeColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+
+                    android:layout_below="@id/etEmailLayoutRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                        android:id="@+id/input_password_register"
+                        android:layout_width="match_parent"
+                        android:textColorHint="@android:color/white"
+                        android:textColor="@color/white"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/password"
+                        android:inputType="textPassword" />
+            </android.support.design.widget.TextInputLayout>
+
+
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_up"
+                    android:id="@+id/signUp"
+                    android:minWidth="200dp"
+                    android:layout_below="@id/passwordLayoutRegister"
+                    android:background="@color/colorPrimary"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_centerHorizontal="true"
+                    android:backgroundTint="@color/colorPrimary"/>
+
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/have_account"
+                        android:layout_below="@id/signUp"
+                        android:layout_marginTop="10dp"
+                        android:layout_centerHorizontal="true"
+                        android:id="@+id/have_account"/>
+
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/login"
+                    android:minWidth="200dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:id="@+id/back_to_login"
+                    android:layout_below="@id/have_account"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
+                    android:backgroundTint="@color/colorPrimary"/>
+        </RelativeLayout>
+    </ScrollView>
+    <ImageView android:layout_width="100dp" android:layout_height="100dp"
+               android:src="@drawable/ic_menu_white_24dp"
+               android:id="@+id/logoRegister"
+               android:layout_above="@id/container"
+               android:layout_centerHorizontal="true"
+               android:contentDescription="@string/logo"
+               android:layout_marginTop="20dp"
+    />
+
+</RelativeLayout>

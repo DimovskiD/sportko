@@ -1,12 +1,11 @@
 package com.dimovski.sportko.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 import butterknife.BindView;
@@ -19,7 +18,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class StartActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "START_ACTIVITY";
     @BindView(R.id.login)
@@ -36,13 +35,11 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
-
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
 
         authentication = FirebaseAuth.getInstance();
+
         login.setOnClickListener(this);
         register.setOnClickListener(this);
     }
@@ -57,7 +54,9 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void startListActivity() {
-
+        Intent i = new Intent(this,ListActivity.class);
+        startActivity(i);
+        this.finish();
     }
 
     @Override
@@ -73,6 +72,8 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void startRegisterActivity() {
+        Intent startActivity = new Intent(this,RegisterActivity.class);
+        startActivity(startActivity);
     }
 
     private void validateLoginDetails() {
@@ -100,7 +101,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(StartActivity.this, "Authentication failed.",
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
                         }
