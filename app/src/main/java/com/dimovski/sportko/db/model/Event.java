@@ -12,6 +12,8 @@ public class Event {
     private long lat;
     private long lon;
     private String locationName;
+    private String imgSrc;
+
 
     public Event() {}
 
@@ -19,7 +21,7 @@ public class Event {
         this.id = id;
     }
 
-    public Event(int id, String title, String description, Date created, Date scheduled, long lat, long lon, String locationName) {
+    public Event(int id, String title, String description, Date created, Date scheduled, long lat, long lon, String locationName, String imgSrc) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -28,6 +30,7 @@ public class Event {
         this.lat = lat;
         this.lon = lon;
         this.locationName = locationName;
+        this.imgSrc = imgSrc;
     }
 
     public int getId() {
@@ -92,5 +95,13 @@ public class Event {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public String getImgSrc() {
+        return imgSrc;
+    }
+
+    public void setImgSrc(String imgSrc) {
+        this.imgSrc = imgSrc;
     }
 }

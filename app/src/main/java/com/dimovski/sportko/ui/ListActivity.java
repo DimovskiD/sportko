@@ -3,6 +3,7 @@ package com.dimovski.sportko.ui;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,15 +18,19 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.adapter.EventAdapter;
+import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.viewmodel.EventViewModel;
 import com.google.firebase.auth.FirebaseAuth;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -33,6 +38,9 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     Unbinder unbinder;
     EventViewModel viewModel;
     EventAdapter adapter;
+    Observer<List<Event>> eventObserver;
+    SharedPreferences sharedPreferences;
+    String currentUser;
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -44,6 +52,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     FloatingActionButton fab;
     @BindView(R.id.rvList)
     RecyclerView recyclerView;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +71,21 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
 
         viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        progressBar.setVisibility(View.VISIBLE);
+
+        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+
+        currentUser = sharedPreferences.getString(Constants.EMAIL,"");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        viewModel.getEvents().observe(this, new Observer<List<Event>>() {
+        eventObserver = new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
+                if (progressBar.getVisibility()==View.VISIBLE) progressBar.setVisibility(View.GONE);
                 if (adapter!=null)
                     adapter.setEvents(events);
                 else {
@@ -77,7 +93,9 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                     recyclerView.setAdapter(adapter);
                 }
             }
-        });
+        };
+
+        viewModel.getEvents().observe(this, eventObserver);
     }
 
 
@@ -110,11 +128,17 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         switch (menuItem.getItemId()) {
             case R.id.logOut:
                 FirebaseAuth.getInstance().signOut();
+                SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+                sharedPreferences.edit().putString(Constants.EMAIL,"").apply();
                 navigateToLoginActivity();
                 break;
             case R.id.List:
+                viewModel.getMyEvents(currentUser).removeObservers(this);
+                viewModel.getEvents().observe(this,eventObserver);
                 break;
             case R.id.myEvents:
+                viewModel.getEvents().removeObservers(this);
+                viewModel.getMyEvents(currentUser).observe(this,eventObserver);
                 break;
             case R.id.settings:
                 break;

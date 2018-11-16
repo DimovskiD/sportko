@@ -1,6 +1,7 @@
 package com.dimovski.sportko.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -11,9 +12,11 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.utils.StringUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.Context;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -90,6 +93,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d(TAG, "signInWithEmail:success");
                                 FirebaseUser user = authentication.getCurrentUser();
+                                SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
+                                sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
                                 startListActivity();
                             } else {
                                 // If sign in fails, display a message to the user.

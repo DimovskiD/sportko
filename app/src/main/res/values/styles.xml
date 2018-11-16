@@ -9,4 +9,8 @@
         <item name="android:statusBarColor">@color/status_bar_color</item>
     </style>
 
+    <style name="TextLabel" parent="Widget.Design.TextInputLayout">
+        <item name="android:colorAccent">@color/black</item>
+    </style>
+
 </resources>

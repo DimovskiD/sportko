@@ -6,16 +6,35 @@
                 android:layout_centerInParent="true"
                 xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <android.support.v7.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:cardBackgroundColor="@color/common_google_signin_btn_text_light_focused"
+            app:cardCornerRadius="6dp"
+            app:cardElevation="6dp">
     <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp">
 
+            <ImageView android:layout_width="match_parent" android:layout_height="200dp"
+                       android:scaleType="centerInside"
+                       android:id="@+id/event_photo_create"
+                       android:contentDescription="@string/event_photo"
+                       android:layout_alignParentTop="true"
+                       android:layout_centerHorizontal="true"
+            />
+
+
             <android.support.design.widget.TextInputLayout
+                    android:layout_below="@id/event_photo_create"
                     android:id="@+id/etEventTitle"
-                    app:boxStrokeColor="@android:color/white"
                     android:layout_width="match_parent"
-                    android:textColorHint="@android:color/white"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp">
@@ -23,7 +42,7 @@
                 <android.support.design.widget.TextInputEditText
                         android:id="@+id/input_event_title"
                         android:layout_width="match_parent"
-                        android:textColorHint="@android:color/white"
+                        android:textColorHint="@color/white"
                         android:textColor="@color/white"
                         android:layout_height="wrap_content"
                         android:hint="@string/title"
@@ -32,9 +51,7 @@
 
             <android.support.design.widget.TextInputLayout
                     android:id="@+id/etEventDescription"
-                    app:boxStrokeColor="@android:color/white"
-                    android:textColorHint="@android:color/white"
-
+                    style="@style/TextLabel"
                     android:layout_below="@id/etEventTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -44,20 +61,27 @@
                 <android.support.design.widget.TextInputEditText
                         android:id="@+id/inpuut_description"
                         android:layout_width="match_parent"
-                        android:textColorHint="@android:color/white"
+                        android:textColorHint="@color/white"
                         android:textColor="@color/white"
                         android:layout_height="wrap_content"
                         android:hint="@string/description"
                         android:inputType="text" />
             </android.support.design.widget.TextInputLayout>
 
+            <Spinner
+                android:id="@+id/category_spinner"
+                android:layout_width="match_parent"
+                android:layout_below="@id/etEventDescription"
+                android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"/>
 
             <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/create_event"
                     android:id="@+id/createEvent"
                     android:minWidth="200dp"
-                    android:layout_below="@id/etEventDescription"
+                    android:layout_below="@id/category_spinner"
                     android:background="@color/colorPrimary"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
@@ -70,5 +94,6 @@
 
 
         </RelativeLayout>
+    </android.support.v7.widget.CardView>
     </ScrollView>
 

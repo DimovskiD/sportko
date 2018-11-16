@@ -26,5 +26,10 @@ public class BaseActivity  extends AppCompatActivity {
         this.finish();
     }
 
+    protected void startLoginActivity() {
+        Intent startActivity = new Intent(this,LoginActivity.class);
+        startActivity(startActivity);
+        this.finish();
+    }
 
 }

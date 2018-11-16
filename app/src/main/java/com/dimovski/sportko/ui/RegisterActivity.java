@@ -1,6 +1,7 @@
 package com.dimovski.sportko.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.FirebaseRepository;
 import com.dimovski.sportko.utils.StringUtils;
@@ -86,6 +88,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                         // Sign in success, update UI with the signed-in user's information
                         Log.d("CREATE_ACC", "createUserWithEmail:success");
                         FirebaseUser user = authentication.getCurrentUser();
+                        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
+                        sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
                         repo.insertUser(new User(user.getEmail()));
                         startListActivity();
                     } else {

@@ -24,4 +24,7 @@
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="create_event">Create event</string>
+    <string name="event_photo">Event photo</string>
+    <string name="location">Location</string>
+    <string name="date_and_time_of_event">Date and time of event</string>
 </resources>

@@ -5,16 +5,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.utils.DateTimeUtils;
 
 import java.util.List;
 
 public class EventAdapter extends
         RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
-    List<Event> events;
+    private List<Event> events;
+    private ViewGroup parent;
 
     public EventAdapter(List<Event> eventList){
         events = eventList;
@@ -23,9 +27,9 @@ public class EventAdapter extends
     // Usually involves inflating a layout from XML and returning the holder
     @NonNull
     @Override
-    public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public EventAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
+        this.parent = parent;
         // Inflate the custom layout
         View contactView = inflater.inflate(R.layout.rv_list_item, parent, false);
 
@@ -40,7 +44,10 @@ public class EventAdapter extends
 
         Event e = events.get(position);
         viewHolder.title.setText(e.getTitle());
-        viewHolder.description.setText(e.getDescription());
+        viewHolder.date.setText(DateTimeUtils.formatDate(e.getScheduled(),parent.getContext()));
+        viewHolder.time.setText(DateTimeUtils.formatTime(e.getScheduled(),parent.getContext()));
+        viewHolder.location.setText(e.getLocationName());
+        Glide.with(parent.getContext()).load(e.getImgSrc()).into(viewHolder.image);
     }
 
     // Returns the total count of items in the list
@@ -60,8 +67,10 @@ public class EventAdapter extends
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public TextView title;
-        public TextView description;
-
+        public TextView date;
+        public TextView time;
+        public TextView location;
+        public ImageView image;
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
@@ -70,7 +79,10 @@ public class EventAdapter extends
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.eventTitle);
-            description = (TextView) itemView.findViewById(R.id.eventDescription);
+            date = (TextView) itemView.findViewById(R.id.eventDate);
+            time = itemView.findViewById(R.id.eventTime);
+            image = itemView.findViewById(R.id.event_photo);
+            location = itemView.findViewById(R.id.location);
         }
     }
 }
