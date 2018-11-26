@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/containerAddEvent"
+            android:layout_centerInParent="true"
+            xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:cardBackgroundColor="@color/common_google_signin_btn_text_light_focused"
+            app:cardCornerRadius="6dp"
+            app:cardElevation="6dp">
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+
+            <ImageView android:layout_width="match_parent" android:layout_height="200dp"
+                       android:scaleType="centerInside"
+                       android:id="@+id/event_photo_edit"
+                       android:contentDescription="@string/event_photo"
+                       android:layout_alignParentTop="true"
+                       android:layout_centerHorizontal="true"
+            />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:id="@+id/event_title"
+                      style="@style/TextAppearance.AppCompat.Headline"
+                      android:layout_below="@id/event_photo_edit"
+            />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:id="@+id/event_type"
+                      android:layout_below="@id/event_title"
+            />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:layout_below="@id/event_type"
+                      android:layout_marginTop="5dp"
+                      android:id="@+id/event_desc"
+            />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                          android:id="@+id/dateContainer"
+            android:orientation="horizontal"
+                          android:layout_marginTop="5dp"
+            android:layout_below="@id/event_desc">
+                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:src="@drawable/ic_event_date_black_24dp"
+                android:tint="@color/white"
+                android:contentDescription="@string/date"
+                           android:layout_marginEnd="5dp"
+                />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:id="@+id/event_date"/>
+
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          android:layout_marginTop="5dp"
+                          android:id="@+id/attendingContainer"
+            android:layout_below="@id/dateContainer">
+                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                           android:src="@drawable/ic_person_pin_black_24dp"
+                           android:tint="@color/white"
+                           android:contentDescription="@string/date"
+                           android:layout_marginEnd="5dp"
+                />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:id="@+id/attending"/>
+
+            </LinearLayout>
+
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/attend"
+                    android:id="@+id/attendEvent"
+                    android:minWidth="200dp"
+                    android:layout_below="@id/attendingContainer"
+                    android:background="@color/colorPrimary"
+                    android:paddingTop="15dp"
+                    android:textAllCaps="true"
+                    android:paddingBottom="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_centerHorizontal="true"
+                    android:backgroundTint="@color/colorPrimary"/>
+
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</ScrollView>

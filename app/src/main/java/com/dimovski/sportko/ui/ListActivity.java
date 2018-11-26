@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,16 +25,16 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.adapter.EventAdapter;
+import com.dimovski.sportko.adapter.ItemClickHandler;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.viewmodel.EventViewModel;
 import com.google.firebase.auth.FirebaseAuth;
-import org.jetbrains.annotations.NotNull;
+import org.greenrobot.eventbus.EventBus;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
-public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
 
     Unbinder unbinder;
     EventViewModel viewModel;
@@ -54,6 +55,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     RecyclerView recyclerView;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout refreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +71,25 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         navigationView.getMenu().getItem(0).setChecked(true);
         fab.setOnClickListener(this);
-
         viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
+
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() { //todo
+                if (navigationView.getCheckedItem()!=null)
+                if (navigationView.getCheckedItem().getItemId() == R.id.List){
+                    viewModel.getUpcomingEvents().removeObservers(ListActivity.this);
+                    viewModel.getUpcomingEvents().observe(ListActivity.this,eventObserver);
+                }
+                else if (navigationView.getCheckedItem().getItemId() == R.id.List) {
+                    viewModel.getMyEvents(currentUser).removeObservers(ListActivity.this);
+                    viewModel.getMyEvents(currentUser).observe(ListActivity.this,eventObserver);
+                }
+
+            }
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         progressBar.setVisibility(View.VISIBLE);
 
@@ -89,13 +109,15 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 if (adapter!=null)
                     adapter.setEvents(events);
                 else {
-                    adapter = new EventAdapter(events);
+                    adapter = new EventAdapter(events,ListActivity.this);
                     recyclerView.setAdapter(adapter);
                 }
+                if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
             }
         };
 
-        viewModel.getEvents().observe(this, eventObserver);
+        viewModel.getUpcomingEvents().observe(this, eventObserver);
+
     }
 
 
@@ -134,10 +156,10 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 break;
             case R.id.List:
                 viewModel.getMyEvents(currentUser).removeObservers(this);
-                viewModel.getEvents().observe(this,eventObserver);
+                viewModel.getUpcomingEvents().observe(this,eventObserver);
                 break;
             case R.id.myEvents:
-                viewModel.getEvents().removeObservers(this);
+                viewModel.getUpcomingEvents().removeObservers(this);
                 viewModel.getMyEvents(currentUser).observe(this,eventObserver);
                 break;
             case R.id.settings:
@@ -157,6 +179,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         }
     }
 
+
     private void navigateToLoginActivity() {
         Intent i = new Intent(this,LoginActivity.class);
         startActivity(i);
@@ -166,5 +189,18 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     private void startCreateNewActivity() {
         Intent i = new Intent(this,AddEventActivity.class);
         startActivity(i);
+    }
+
+    @Override
+    public void itemClicked(Event event) {
+        Intent i;
+        if (event.getCreatedBy().equals(currentUser)) {
+             i = new Intent(this, AddEventActivity.class);
+        }
+        else {
+            i = new Intent(this,EventDetailActivity.class);
+        }
+        startActivity(i);
+        EventBus.getDefault().postSticky(event);
     }
 }

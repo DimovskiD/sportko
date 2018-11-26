@@ -71,24 +71,69 @@
             <Spinner
                 android:id="@+id/category_spinner"
                 android:layout_width="match_parent"
-                android:layout_below="@id/etEventDescription"
                 android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"/>
+                android:layout_marginTop="15dp"
+                android:layout_below="@id/etEventDescription"
+                android:layout_marginBottom="15dp"/>
+
+
+
+
+        <android.support.design.widget.TextInputLayout
+                android:id="@+id/etDateScheduled"
+                style="@style/TextLabel"
+                android:layout_below="@id/category_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+
+            <android.support.design.widget.TextInputEditText
+                    android:id="@+id/input_date_scheduled"
+                    android:layout_width="match_parent"
+                    android:textColorHint="@color/white"
+                    android:textColor="@color/white"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:focusableInTouchMode="false"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:hint="@string/when"
+                    android:inputType="none" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+                android:id="@+id/etMaxAtendees"
+                style="@style/TextLabel"
+                android:layout_below="@id/etDateScheduled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+
+            <android.support.design.widget.TextInputEditText
+                    android:id="@+id/input_max_atendees"
+                    android:layout_width="match_parent"
+                    android:textColorHint="@color/white"
+                    android:textColor="@color/white"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/open_positions"
+                    android:inputType="number" />
+        </android.support.design.widget.TextInputLayout>
 
             <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/create_event"
                     android:id="@+id/createEvent"
                     android:minWidth="200dp"
-                    android:layout_below="@id/category_spinner"
+                    android:layout_below="@id/etMaxAtendees"
                     android:background="@color/colorPrimary"
                     android:paddingTop="15dp"
                     android:paddingBottom="15dp"
                     android:layout_marginTop="10dp"
                     android:layout_centerHorizontal="true"
                     android:backgroundTint="@color/colorPrimary"/>
-
 
 
 

@@ -8,6 +8,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
         app:cardBackgroundColor="@color/background"
+        android:id="@+id/containerRvItem"
         app:cardCornerRadius="6dp"
         app:cardElevation="6dp">
 
@@ -80,6 +81,16 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                           android:id="@+id/location"
                           android:textColor="@android:color/background_dark"
+
+                />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:id="@+id/badgeContainer" android:orientation="horizontal">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:id="@+id/badge"
+                          android:textAllCaps="true"
 
                 />
             </LinearLayout>

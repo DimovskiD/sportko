@@ -9,11 +9,15 @@ import java.util.Date;
 public class DateTimeUtils {
     public static String formatDate(Date scheduled, Context context) {
         Format dateFormat = android.text.format.DateFormat.getDateFormat(context);
-        return ((DateFormat) dateFormat).format(scheduled);
+        if (scheduled!=null)
+            return ((DateFormat) dateFormat).format(scheduled);
+        else return "";
     }
 
     public static String formatTime(Date scheduled, Context context) {
         Format timeFormat = android.text.format.DateFormat.getTimeFormat(context);
-        return ((DateFormat) timeFormat).format(scheduled);
+        if (scheduled!=null)
+            return ((DateFormat) timeFormat).format(scheduled);
+        else return "";
     }
 }

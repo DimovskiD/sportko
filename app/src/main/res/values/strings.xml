@@ -27,4 +27,15 @@
     <string name="event_photo">Event photo</string>
     <string name="location">Location</string>
     <string name="date_and_time_of_event">Date and time of event</string>
+    <string name="when">When?</string>
+    <string name="pick_date_time">Pick date and time</string>
+    <string name="open_positions">Open positions</string>
+    <string name="required_field">This field is required</string>
+    <string name="event_type">Type of event</string>
+    <string name="attending">Attending</string>
+    <string name="date">Date</string>
+    <string name="attend">Attend</string>
+    <string name="edit_event">Edit event</string>
+    <string name="finished">Finished</string>
+    <string name="full">Full</string>
 </resources>
