@@ -63,16 +63,18 @@ public class EventAdapter extends
                 handler.itemClicked(e);
             }
         });
+        viewHolder.badgeContainer.setVisibility(View.GONE);
         if (e.getAttendees().size()==e.getMaxAttendees()) {
             viewHolder.badge.setText(R.string.full);
             viewHolder.badge.setTextColor(parent.getContext().getResources().getColor(android.R.color.darker_gray));
             viewHolder.badgeContainer.setBackground(parent.getContext().getResources().getDrawable(R.drawable.custom_border_gray));
+            viewHolder.badgeContainer.setVisibility(View.VISIBLE);
         }
         if (e.getScheduled().before(Calendar.getInstance().getTime())) {
             viewHolder.badge.setText(R.string.finished);
             viewHolder.badge.setTextColor(parent.getContext().getResources().getColor(android.R.color.holo_red_dark));
             viewHolder.badgeContainer.setBackground(parent.getContext().getResources().getDrawable(R.drawable.custom_border_red));
-
+            viewHolder.badgeContainer.setVisibility(View.VISIBLE);
         }
 
     }

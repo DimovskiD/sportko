@@ -46,7 +46,7 @@
                         android:textColor="@color/white"
                         android:layout_height="wrap_content"
                         android:hint="@string/title"
-                        android:inputType="text" />
+                        android:inputType="textCapSentences" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -65,7 +65,7 @@
                         android:textColor="@color/white"
                         android:layout_height="wrap_content"
                         android:hint="@string/description"
-                        android:inputType="text" />
+                        android:inputType="textCapSentences" />
             </android.support.design.widget.TextInputLayout>
 
             <Spinner
@@ -102,11 +102,33 @@
                     android:inputType="none" />
         </android.support.design.widget.TextInputLayout>
 
+        <android.support.design.widget.TextInputLayout
+                android:id="@+id/autoCompletePlaces"
+                style="@style/TextLabel"
+                android:layout_below="@id/etDateScheduled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+
+            <android.support.design.widget.TextInputEditText
+                    android:id="@+id/input_auto_complete"
+                    android:layout_width="match_parent"
+                    android:textColorHint="@color/white"
+                    android:textColor="@color/white"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:focusableInTouchMode="false"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:hint="@string/where"
+                    android:inputType="none" />
+        </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
                 android:id="@+id/etMaxAtendees"
                 style="@style/TextLabel"
-                android:layout_below="@id/etDateScheduled"
+                android:layout_below="@id/autoCompletePlaces"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -122,7 +144,10 @@
                     android:inputType="number" />
         </android.support.design.widget.TextInputLayout>
 
-            <Button android:layout_width="wrap_content"
+
+
+
+        <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/create_event"
                     android:id="@+id/createEvent"

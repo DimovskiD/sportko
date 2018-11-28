@@ -48,10 +48,13 @@
             
            
         </android.support.v4.widget.SwipeRefreshLayout>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"android:layout_centerInParent="true"
-        >
-            <TextView android:layout_width="" android:layout_height=""/>
-        </LinearLayout>    
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/no_upcoming_events"
+                  android:id="@+id/emptyRv"
+                  android:visibility="gone"
+                  android:layout_centerInParent="true"
+            />
+
 
         <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:id="@+id/list_group">
-        <item android:title="List"
+        <item android:title="Upcoming"
                 android:id="@+id/List" />
 
         <item android:title="My Events"

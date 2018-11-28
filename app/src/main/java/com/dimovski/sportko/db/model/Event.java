@@ -10,8 +10,8 @@ public class Event {
     private String description;
     private Date created;
     private Date scheduled;
-    private long lat;
-    private long lon;
+    private double lat;
+    private double lon;
     private String locationName;
     private String imgSrc;
     private int maxAttendees;
@@ -26,7 +26,7 @@ public class Event {
         this.id = id;
     }
 
-    public Event(String title, String description, Date created, Date scheduled, long lat, long lon, String locationName, String imgSrc, int maxAttendees, String typeOfEvent
+    public Event(String title, String description, Date created, Date scheduled, double lat, double lon, String locationName, String imgSrc, int maxAttendees, String typeOfEvent
     ,String createdBy) {
         this.title = title;
         this.description = description;
@@ -83,19 +83,19 @@ public class Event {
         this.scheduled = scheduled;
     }
 
-    public long getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(long lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public long getLon() {
+    public double getLon() {
         return lon;
     }
 
-    public void setLon(long lon) {
+    public void setLon(double lon) {
         this.lon = lon;
     }
 

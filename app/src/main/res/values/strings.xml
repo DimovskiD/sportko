@@ -38,4 +38,10 @@
     <string name="edit_event">Edit event</string>
     <string name="finished">Finished</string>
     <string name="full">Full</string>
+    <string name="no_upcoming_events">No events.</string>
+    <string name="no_internet">No Internet connection.</string>
+    <string name="where">Where?</string>
+    <string name="cannot_attend_full_event">You cannot attend a full event.</string>
+    <string name="upcoming_events">Upcoming events</string>
+    <string name="my_events">My Events</string>
 </resources>

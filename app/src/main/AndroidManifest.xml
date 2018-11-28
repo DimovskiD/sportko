@@ -4,6 +4,8 @@
           package="com.dimovski.sportko">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
             android:allowBackup="true"
@@ -30,6 +32,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.EventDetailActivity"/>
+
+        <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyBEUPt_esTuoXoR8ahOaZ3P7yx4cDb79Ps"/>
+
     </application>
 
 </manifest>

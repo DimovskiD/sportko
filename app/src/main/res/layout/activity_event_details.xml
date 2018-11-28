@@ -63,10 +63,27 @@
             </LinearLayout>
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                          android:id="@+id/whereContainer"
+                          android:orientation="horizontal"
+                          android:layout_marginTop="5dp"
+                          android:layout_below="@id/dateContainer">
+                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                           android:src="@drawable/ic_location_on_black_24dp"
+                           android:tint="@color/white"
+                           android:contentDescription="@string/location"
+                           android:layout_marginEnd="5dp"
+                />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:id="@+id/where"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                           android:orientation="horizontal"
                           android:layout_marginTop="5dp"
                           android:id="@+id/attendingContainer"
-            android:layout_below="@id/dateContainer">
+            android:layout_below="@id/whereContainer">
                 <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
                            android:src="@drawable/ic_person_pin_black_24dp"
                            android:tint="@color/white"
@@ -92,6 +109,21 @@
                     android:layout_centerHorizontal="true"
                     android:backgroundTint="@color/colorPrimary"/>
 
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/attending"
+                    android:id="@+id/attendingEvent"
+                    android:minWidth="200dp"
+                    android:layout_below="@id/attendingContainer"
+                    android:background="@color/gray"
+                    android:paddingTop="15dp"
+                    android:textAllCaps="true"
+                    android:paddingBottom="15dp"
+                    android:textColor="@color/black"
+                    android:visibility="gone"
+                    android:layout_marginTop="10dp"
+                    android:layout_centerHorizontal="true"
+                    android:backgroundTint="@color/gray"/>
 
         </RelativeLayout>
 

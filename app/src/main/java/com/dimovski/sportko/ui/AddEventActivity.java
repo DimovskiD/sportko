@@ -1,12 +1,21 @@
 package com.dimovski.sportko.ui;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
@@ -18,8 +27,23 @@ import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.FirebaseRepository;
+import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.utils.DateTimeUtils;
+import com.dimovski.sportko.utils.PhotoUtils;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnSuccessListener;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -31,10 +55,11 @@ import java.util.Date;
 
 public class AddEventActivity extends BaseActivity implements View.OnClickListener {
 
-    enum Mode {UPDATE, CREATE}
 
     Unbinder unbinder;
     FirebaseRepository repository = new FirebaseRepository();
+    String[] locPermission = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
+
 
     @BindView(R.id.input_event_title)
     TextInputEditText title;
@@ -50,6 +75,8 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     TextInputEditText scheduledTime;
     @BindView(R.id.input_max_atendees)
     TextInputEditText maxAtendees;
+    @BindView(R.id.input_auto_complete)
+    TextInputEditText autoCompletePlaces;
 
 
     private Date scheduled;
@@ -58,7 +85,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     SharedPreferences sharedPreferences;
     private Event event;
     private Mode mode;
-
+    private double lat;
+    private double lon;
+    private SingleDateAndTimePickerDialog dateTimeDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,10 +98,14 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         createEvent.setOnClickListener(this);
         scheduledTime.setOnClickListener(this);
         maxAtendees.setOnClickListener(this);
+        autoCompletePlaces.setOnClickListener(this);
         setUpSpinner();
-        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
         mode = Mode.CREATE;
+
+
     }
+
 
     @Override
     protected void onStart() {
@@ -93,13 +126,16 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         description.setText(event.getDescription());
         categorySpinner.setSelection(adapter.getPosition(event.getTypeOfEvent()));
         Glide.with(this).load(event.getImgSrc()).into(photo);
+        autoCompletePlaces.setText(event.getLocationName());
+        lat = event.getLat();
+        lon = event.getLon();
         scheduledTime.setText(String.format("%s %s", DateTimeUtils.formatDate(event.getScheduled(), this), DateTimeUtils.formatTime(event.getScheduled(), this)));
         maxAtendees.setText(String.format("%d", event.getMaxAttendees()));
         createEvent.setText(R.string.edit_event);
     }
 
     private void setUpSpinner() {
-       adapter= ArrayAdapter.createFromResource(this,
+        adapter = ArrayAdapter.createFromResource(this,
                 R.array.categories, android.R.layout.simple_spinner_item);
 
         // Specify the layout to use when the list of choices appears
@@ -110,7 +146,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String id1 = categorySpinner.getSelectedItem().toString().toLowerCase();
-                Log.i("ADD_EVENT",id1);
+                Log.i("ADD_EVENT", id1);
                 final int resourceId = getResources().getIdentifier(id1, "drawable",
                         getPackageName());
                 AddEventActivity.this.photoResourceId = resourceId;
@@ -142,7 +178,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.createEvent:
                 crEditButtonClicked();
                 break;
@@ -153,7 +189,54 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                 break;
             case R.id.input_max_atendees:
                 break;
+            case R.id.input_auto_complete:
+                if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED)) {
+                        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                startAutoCompleteFragment(location);
+                            }
+                        });
+                }
+                else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(locPermission, Constants.LOCATION_PERMISSION);
+                    }
+                }
+                break;
         }
+    }
+
+    private void startAutoCompleteFragment(Location location) {
+        try {
+            LatLngBounds bounds = null;
+            if (location!=null) {
+                bounds = new LatLngBounds(new LatLng(location.getLatitude(),location.getLongitude()),new LatLng(location.getLatitude(),location.getLongitude()));
+            }
+            AutocompleteFilter filter = new AutocompleteFilter.Builder()
+                    .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
+                    .build();
+
+            Intent intent;
+            if (bounds!=null)
+                intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(filter)
+                    .setBoundsBias(bounds)
+                    .build(this);
+            else intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(filter)
+                    .build(this);
+
+            startActivityForResult(intent, Constants.PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException e) {
+            // TODO: Handle the error.
+        } catch (GooglePlayServicesNotAvailableException e) {
+            // TODO: Handle the error.
+        }
+
     }
 
     private void crEditButtonClicked() {
@@ -166,7 +249,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
 
     private void showDateTimePicker() {
-        new SingleDateAndTimePickerDialog.Builder(AddEventActivity.this)
+        dateTimeDialog = new SingleDateAndTimePickerDialog.Builder(AddEventActivity.this)
                 .bottomSheet()
                 .curved()
                 .mustBeOnFuture()
@@ -174,42 +257,45 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                 .listener(new SingleDateAndTimePickerDialog.Listener() {
                     @Override
                     public void onDateSelected(Date date) {
-                        scheduled=date;
+                        scheduled = date;
                         scheduledTime.setText(String.format("%s %s", DateTimeUtils.formatDate(date, AddEventActivity.this), DateTimeUtils.formatTime(date, AddEventActivity.this)));
                     }
-                }).display();
+                }).build();
+        dateTimeDialog.display();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (dateTimeDialog!=null && dateTimeDialog.isDisplaying())
+            dateTimeDialog.close();
+        else super.onBackPressed();
     }
 
     private void crEditEvent() {
 
-
-
-        String createdBy = sharedPreferences.getString(Constants.EMAIL,"");
+        String createdBy = sharedPreferences.getString(Constants.EMAIL, "");
 
         Resources resources = getResources();
-        Uri uri = new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(resources.getResourcePackageName(photoResourceId))
-                .appendPath(resources.getResourceTypeName(photoResourceId))
-                .appendPath(resources.getResourceEntryName(photoResourceId))
-                .build();
+        Uri uri = PhotoUtils.getUriForId(resources, photoResourceId);
 
         Event e;
-        if (mode==Mode.CREATE) {
+        if (mode == Mode.CREATE) {
             e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
-                    1000, 100, "Here", uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
-                    categorySpinner.getSelectedItem().toString(), createdBy); //TODO replace default values
+                    lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
+                    categorySpinner.getSelectedItem().toString(), createdBy);
             repository.insertEvent(e);
-        }
-        else {
+        } else {
             event.setTitle(title.getText().toString());
             event.setDescription(description.getText().toString());
-            if (scheduled!=null)
+            if (scheduled != null)
                 event.setScheduled(scheduled);
             event.setTypeOfEvent(categorySpinner.getSelectedItem().toString());
             event.setImgSrc(uri.toString());
+            event.setLat(lat);
+            event.setLon(lon);
+            event.setLocationName(autoCompletePlaces.getText().toString());
             String maxAtt = maxAtendees.getText().toString();
-            Log.i("MAX_ATT",maxAtt);
+            Log.i("MAX_ATT", maxAtt);
             event.setMaxAttendees(Integer.parseInt(maxAtt));
             repository.updateEvent(event);
         }
@@ -217,29 +303,81 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     }
 
     private boolean validateInput() {
-        boolean valid =true;
-        if (title.getText()==null || title.getText().toString().equals("")) {
-            valid=false;
+        boolean valid = true;
+        if (title.getText() == null || title.getText().toString().equals("")) {
+            valid = false;
             title.setError(getString(R.string.required_field));
-        }
-        else title.setError(null);
-        if (description.getText()==null || description.getText().toString().equals("")) {
-            valid=false;
+        } else title.setError(null);
+        if (description.getText() == null || description.getText().toString().equals("")) {
+            valid = false;
             description.setError(getString(R.string.required_field));
         } else description.setError(null);
-        if (scheduledTime.getText()==null || scheduledTime.getText().toString().equals("")) {
-            valid=false;
+        if (scheduledTime.getText() == null || scheduledTime.getText().toString().equals("")) {
+            valid = false;
             scheduledTime.setError(getString(R.string.required_field));
         } else scheduledTime.setError(null);
-        if (maxAtendees.getText()==null || maxAtendees.getText().toString().equals("")) {
-            valid=false;
+        if (maxAtendees.getText() == null || maxAtendees.getText().toString().equals("")) {
+            valid = false;
             maxAtendees.setError(getString(R.string.required_field));
-        }
-        else if  (Integer.parseInt(maxAtendees.getText().toString())<=0)  {
-            valid=false;
+        } else if (Integer.parseInt(maxAtendees.getText().toString()) <= 0) {
+            valid = false;
             maxAtendees.setError("The number of open positions must be greater than 0");
-        }
-        else maxAtendees.setError(null);
+        } else maxAtendees.setError(null);
+
+        if (autoCompletePlaces.getText() == null || autoCompletePlaces.getText().toString().equals("")) {
+            valid = false;
+            autoCompletePlaces.setError(getResources().getString(R.string.required_field));
+        } else autoCompletePlaces.setError(null);
+
         return valid;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.PLACE_AUTOCOMPLETE_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    Place p = PlaceAutocomplete.getPlace(AddEventActivity.this, data);
+                    if (p != null) {
+                        autoCompletePlaces.setText(p.getName());
+                        lat = p.getLatLng().latitude;
+                        lon = p.getLatLng().longitude;
+                    }
+                } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                    Status status = PlaceAutocomplete.getStatus(this, data);
+                    // TODO: Handle the error.
+                    Log.i("ERROR", status.getStatusMessage());
+                }
+                break;
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Constants.LOCATION_PERMISSION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1]== PackageManager.PERMISSION_GRANTED) {
+                    FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                startAutoCompleteFragment(location);
+                            }
+                        });
+
+                    }
+
+                } else {
+                    Toast.makeText(AddEventActivity.this,"Permission denied. Place suggestions will not be relevant to your location",Toast.LENGTH_LONG).show();
+                    startAutoCompleteFragment(null);
+                }
+            }
+        }
     }
 }
