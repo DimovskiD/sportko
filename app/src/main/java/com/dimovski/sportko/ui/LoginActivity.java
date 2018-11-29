@@ -40,23 +40,25 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
-
         authentication = FirebaseAuth.getInstance();
-
-        login.setOnClickListener(this);
-        register.setOnClickListener(this);
+        setOnClickListeners();
     }
+
+
 
     @Override
     protected void onStart() {
         super.onStart();
-
         FirebaseUser currentUser = authentication.getCurrentUser();
         if (currentUser!=null)
             startListActivity();
     }
 
 
+    private void setOnClickListeners() {
+        login.setOnClickListener(this);
+        register.setOnClickListener(this);
+    }
 
     @Override
     public void onClick(View v) {
@@ -73,14 +75,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
 
     private void validateLoginDetails() {
-
         boolean error=false;
         if (emailTV.getText() == null || StringUtils.isEmpty(emailTV.getText().toString())) {
-            emailTV.setError("This field is required");
+            emailTV.setError(getString(R.string.required_field));
             error=true;
         }
         if (passwordTV.getText() == null || StringUtils.isEmpty(passwordTV.getText().toString())) {
-            passwordTV.setError("This field is required");
+            passwordTV.setError(getString(R.string.required_field));
             error=true;
         }
 
@@ -99,7 +100,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                Toast.makeText(LoginActivity.this, R.string.auth_failed,
                                         Toast.LENGTH_SHORT).show();
                             }
                         }

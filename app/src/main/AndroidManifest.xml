@@ -32,6 +32,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.EventDetailActivity"/>
+        <activity android:name=".ui.SettingsActivity"
+                  android:parentActivityName=".ui.ListActivity"
+        />
 
         <meta-data
                 android:name="com.google.android.geo.API_KEY"

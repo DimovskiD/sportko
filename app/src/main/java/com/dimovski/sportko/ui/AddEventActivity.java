@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -29,6 +31,7 @@ import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.FirebaseRepository;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.utils.DateTimeUtils;
+import com.dimovski.sportko.utils.LocationUtils;
 import com.dimovski.sportko.utils.PhotoUtils;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -49,8 +52,11 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 
 public class AddEventActivity extends BaseActivity implements View.OnClickListener {
@@ -58,7 +64,6 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     Unbinder unbinder;
     FirebaseRepository repository = new FirebaseRepository();
-    String[] locPermission = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
 
 
     @BindView(R.id.input_event_title)
@@ -190,6 +195,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             case R.id.input_max_atendees:
                 break;
             case R.id.input_auto_complete:
+                if (sharedPreferences.getBoolean(Constants.LOCATION,false)) {
                 if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED)) {
@@ -203,9 +209,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                 }
                 else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(locPermission, Constants.LOCATION_PERMISSION);
+                        requestPermissions(Constants.locPermission, Constants.LOCATION_PERMISSION);
                     }
-                }
+                } } else startAutoCompleteFragment(null);
                 break;
         }
     }
@@ -280,9 +286,12 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
         Event e;
         if (mode == Mode.CREATE) {
+
+            String city = LocationUtils.getCityForLocation(this,lat,lon);
+
             e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
                     lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
-                    categorySpinner.getSelectedItem().toString(), createdBy);
+                    categorySpinner.getSelectedItem().toString(), createdBy, city);
             repository.insertEvent(e);
         } else {
             event.setTitle(title.getText().toString());
@@ -374,7 +383,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                     }
 
                 } else {
-                    Toast.makeText(AddEventActivity.this,"Permission denied. Place suggestions will not be relevant to your location",Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddEventActivity.this,R.string.denied_pemission,Toast.LENGTH_LONG).show();
                     startAutoCompleteFragment(null);
                 }
             }

@@ -1,9 +1,12 @@
 package com.dimovski.sportko.ui;
 
+import android.Manifest;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +14,7 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,8 +36,12 @@ import com.dimovski.sportko.adapter.ItemClickHandler;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.internal.DrawerItem;
+import com.dimovski.sportko.utils.LocationUtils;
 import com.dimovski.sportko.utils.NetworkUtils;
 import com.dimovski.sportko.viewmodel.EventViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import org.greenrobot.eventbus.EventBus;
 
@@ -66,6 +74,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     TextView emptyRv;
 
     private DrawerItem selectedItem = DrawerItem.LIST_EVENTS;
+    private String locCity = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,20 +89,19 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         navigationView.getMenu().getItem(0).setChecked(true);
         fab.setOnClickListener(this);
+
+        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+        currentUser = sharedPreferences.getString(Constants.EMAIL,"");
+
+
+
         viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
 
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (selectedItem == DrawerItem.LIST_EVENTS){
-                    viewModel.getUpcomingEvents().observe(ListActivity.this, eventObserver);
-                    viewModel.getMyEvents(currentUser).removeObservers(ListActivity.this);
-                }
-                else {
-                    viewModel.getMyEvents(currentUser).observe(ListActivity.this,eventObserver);
-                    viewModel.getUpcomingEvents().removeObservers(ListActivity.this);
-                }
+                updateObservers();
                 if (refreshLayout.isRefreshing())
                     refreshLayout.setRefreshing(false);
 
@@ -103,14 +111,23 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         progressBar.setVisibility(View.VISIBLE);
 
-        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
-        currentUser = sharedPreferences.getString(Constants.EMAIL,"");
 
 
         if (!NetworkUtils.checkInternetConnection(this)){
             showSnackbar();
         }
 
+    }
+
+    private void updateObservers() {
+        if (selectedItem == DrawerItem.LIST_EVENTS){
+            viewModel.getUpcomingEvents(locCity).observe(ListActivity.this, eventObserver);
+            viewModel.getMyEvents(currentUser).removeObservers(ListActivity.this);
+        }
+        else {
+            viewModel.getMyEvents(currentUser).observe(ListActivity.this,eventObserver);
+            viewModel.getUpcomingEvents(locCity).removeObservers(ListActivity.this);
+        }
     }
 
     private void showSnackbar() {
@@ -132,6 +149,10 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                     if (events.size()<1) {
                         emptyRv.setVisibility(View.VISIBLE);
                     } else emptyRv.setVisibility(View.GONE);
+                } else {
+                    if (events.size()<1) {
+                        emptyRv.setVisibility(View.VISIBLE);
+                    } else emptyRv.setVisibility(View.GONE);
                 }
                 if (adapter!=null)
                     adapter.setEvents(events);
@@ -139,20 +160,19 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                     adapter = new EventAdapter(events,ListActivity.this);
                     recyclerView.setAdapter(adapter);
                 }
-
                 if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
             }
         };
 
         if (selectedItem == DrawerItem.LIST_EVENTS) {
             toolbar.setTitle(R.string.upcoming_events);
-            viewModel.getUpcomingEvents().observe(this, eventObserver);
+            viewModel.getUpcomingEvents(locCity).observe(this, eventObserver);
         }
         else if (selectedItem == DrawerItem.MY_EVENTS) {
             toolbar.setTitle(R.string.my_events);
             viewModel.getMyEvents(currentUser).observe(this,eventObserver);
         } else if (selectedItem ==DrawerItem.SETTINGS) {
-            viewModel.getUpcomingEvents().removeObservers(this);
+            viewModel.getUpcomingEvents(locCity).removeObservers(this);
             viewModel.getMyEvents(currentUser).removeObservers(this);
             toolbar.setTitle(R.string.action_settings);
         }
@@ -184,36 +204,56 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
             navigationView.getMenu().getItem(i).setChecked(false);
         }
         navigationView.setCheckedItem(menuItem);
-        menuItem.setChecked(true);
+        if (menuItem.getItemId()!=R.id.settings)
+            menuItem.setChecked(true);
+        else {
+            if (selectedItem == DrawerItem.LIST_EVENTS) navigationView.getMenu().getItem(0).setChecked(true);
+
+            else if (selectedItem == DrawerItem.MY_EVENTS) navigationView.getMenu().getItem(1).setChecked(true);
+
+        }
 
         switch (menuItem.getItemId()) {
             case R.id.logOut:
                 FirebaseAuth.getInstance().signOut();
-                SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
-                sharedPreferences.edit().putString(Constants.EMAIL,"").apply();
+                clearPreferences();
                 navigateToLoginActivity();
                 break;
             case R.id.List:
                 viewModel.getMyEvents(currentUser).removeObservers(this);
-                viewModel.getUpcomingEvents().observe(this,eventObserver);
+                viewModel.getUpcomingEvents(locCity).observe(this,eventObserver);
                 selectedItem = DrawerItem.LIST_EVENTS;
                 toolbar.setTitle(R.string.upcoming_events);
                 break;
             case R.id.myEvents:
-                viewModel.getUpcomingEvents().removeObservers(this);
+                viewModel.getUpcomingEvents(locCity ).removeObservers(this);
                 viewModel.getMyEvents(currentUser).observe(this,eventObserver);
                 selectedItem = DrawerItem.MY_EVENTS;
                 toolbar.setTitle(R.string.my_events);
                 break;
             case R.id.settings:
-                selectedItem = DrawerItem.SETTINGS;
-                viewModel.getUpcomingEvents().removeObservers(this);
-                viewModel.getMyEvents(currentUser).removeObservers(this);
-                toolbar.setTitle(R.string.action_settings);
+//                selectedItem = DrawerItem.SETTINGS;
+//                viewModel.getUpcomingEvents().removeObservers(this);
+//                viewModel.getMyEvents(currentUser).removeObservers(this);
+//                toolbar.setTitle(R.string.action_settings);
+                startSettingsActivity();
                 break;
         }
         drawerLayout.closeDrawers();
         return true;
+    }
+
+    private void clearPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+        SharedPreferences.Editor editor =  sharedPreferences.edit();
+        editor.putString(Constants.EMAIL,"");
+        editor.putString(Constants.USER,"");
+        editor.apply();
+    }
+
+    private void startSettingsActivity() {
+        Intent i = new Intent(this,SettingsActivity.class);
+        startActivity(i);
     }
 
 

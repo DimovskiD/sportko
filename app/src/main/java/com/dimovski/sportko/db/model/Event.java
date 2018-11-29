@@ -18,7 +18,7 @@ public class Event {
     private String typeOfEvent;
     private String createdBy;
     private ArrayList<String> attendees;
-
+    private String city;
 
     public Event() {}
 
@@ -27,7 +27,7 @@ public class Event {
     }
 
     public Event(String title, String description, Date created, Date scheduled, double lat, double lon, String locationName, String imgSrc, int maxAttendees, String typeOfEvent
-    ,String createdBy) {
+    ,String createdBy, String city) {
         this.title = title;
         this.description = description;
         this.created = created;
@@ -40,6 +40,7 @@ public class Event {
         this.typeOfEvent = typeOfEvent;
         this.createdBy = createdBy;
         this.attendees = new ArrayList<>(maxAttendees);
+        this.city = city;
         attendees.add(createdBy);
     }
 
@@ -152,5 +153,13 @@ public class Event {
 
     public void removeAtendee(String attendee) {
         attendees.remove(attendee);
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }

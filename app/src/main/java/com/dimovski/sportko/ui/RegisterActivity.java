@@ -40,6 +40,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     TextInputEditText email;
     @BindView(R.id.input_password_register)
     TextInputEditText password;
+    @BindView(R.id.input_username)
+    TextInputEditText username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +72,15 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private void signUpUser() {
         boolean error=false;
         if (email.getText() == null || StringUtils.isEmpty(password.getText().toString())) {
-            email.setError("This field is required");
+            email.setError(getString(R.string.required_field));
             error=true;
         }
         if (password.getText() == null || StringUtils.isEmpty(password.getText().toString())) {
-            password.setError("This field is required");
+            password.setError(getString(R.string.required_field));
+            error=true;
+        }
+        if (username.getText() == null || StringUtils.isEmpty(username.getText().toString())){
+            username.setError(getString(R.string.required_field));
             error=true;
         }
 
@@ -88,8 +94,11 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                         Log.d("CREATE_ACC", "createUserWithEmail:success");
                         FirebaseUser user = authentication.getCurrentUser();
                         SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
-                        sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
-                        repo.insertUser(new User(user.getEmail()));
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(Constants.EMAIL, user.getEmail());
+                        editor.putString(Constants.USER,username.getText().toString());
+                        editor.apply();
+                        repo.upSertUser(new User(user.getEmail(),username.getText().toString()));
                         startListActivity();
                     } else {
                         // If sign in fails, display a message to the user.

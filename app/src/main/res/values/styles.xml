@@ -13,4 +13,8 @@
         <item name="android:colorAccent">@color/black</item>
     </style>
 
+    <style name="switchStyle">
+        <item name="colorControlActivated">@color/colorPrimary</item>
+    </style>
+
 </resources>

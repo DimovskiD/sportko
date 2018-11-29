@@ -44,4 +44,13 @@
     <string name="cannot_attend_full_event">You cannot attend a full event.</string>
     <string name="upcoming_events">Upcoming events</string>
     <string name="my_events">My Events</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="username">Username</string>
+    <string name="use_location">Use location?</string>
+    <string name="number_of_attendees">Number of attendees</string>
+    <string name="created_by">Created by:</string>
+    <string name="auth_failed">Authentication failed.</string>
+    <string name="denied_pemission">Permission denied. Place suggestions will not be relevant to your location</string>
 </resources>

@@ -19,10 +19,41 @@ public class EventViewModel extends ViewModel {
     private MutableLiveData<List<Event>> myEvents;
 
 
-    public LiveData<List<Event>> getUpcomingEvents() {
+
+    public LiveData<List<Event>> getUpcomingEvents(String city) {
         if (events == null) {
             events = new MutableLiveData<List<Event>>();
-            final Query collectionReference = db.collection("events").orderBy("scheduled").whereGreaterThan("scheduled",Calendar.getInstance().getTime());
+            final Query collectionReference = city!=null ? db.collection("events").whereGreaterThan("scheduled",Calendar.getInstance().getTime())
+                   .whereEqualTo("city",city).orderBy("scheduled") : db.collection("events").whereGreaterThan("scheduled",Calendar.getInstance().getTime())
+                   .orderBy("scheduled");
+            collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent( @Nullable QuerySnapshot snapshot,
+                                     @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        Log.e("LIST",e.getMessage());
+                        return;
+                    }
+
+                    if (snapshot != null) {
+                        events.postValue(snapshot.toObjects(Event.class));
+                    } else {
+                        Log.d("LIST", "Current data: null");
+                    }
+
+                }
+            });
+
+        }
+
+        return events;
+    }
+
+    public LiveData<List<Event>> getUpcomingEventsForCity(String city) {
+        if (events == null) {
+            events = new MutableLiveData<List<Event>>();
+            final Query collectionReference = db.collection("events").whereGreaterThan("scheduled",Calendar.getInstance().getTime())
+                    .whereEqualTo("city",city).orderBy("scheduled");
             collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent( @Nullable QuerySnapshot snapshot,

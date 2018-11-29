@@ -83,11 +83,12 @@
                           android:orientation="horizontal"
                           android:layout_marginTop="5dp"
                           android:id="@+id/attendingContainer"
-            android:layout_below="@id/whereContainer">
+                          android:layout_below="@id/whereContainer">
+
                 <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
                            android:src="@drawable/ic_person_pin_black_24dp"
                            android:tint="@color/white"
-                           android:contentDescription="@string/date"
+                           android:contentDescription="@string/number_of_attendees"
                            android:layout_marginEnd="5dp"
                 />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -95,12 +96,23 @@
 
             </LinearLayout>
 
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_below="@id/attendingContainer"
+                      android:layout_height="wrap_content"
+                      android:id="@+id/createdBy"
+                      android:layout_marginTop="5dp"
+                      android:layout_marginBottom="5dp"
+                      android:textColor="@color/white"
+            />
+
+
             <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/attend"
                     android:id="@+id/attendEvent"
                     android:minWidth="200dp"
-                    android:layout_below="@id/attendingContainer"
+                    android:layout_below="@id/createdBy"
                     android:background="@color/colorPrimary"
                     android:paddingTop="15dp"
                     android:textAllCaps="true"
@@ -114,7 +126,7 @@
                     android:text="@string/attending"
                     android:id="@+id/attendingEvent"
                     android:minWidth="200dp"
-                    android:layout_below="@id/attendingContainer"
+                    android:layout_below="@id/createdBy"
                     android:background="@color/gray"
                     android:paddingTop="15dp"
                     android:textAllCaps="true"

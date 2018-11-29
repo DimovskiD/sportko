@@ -3,19 +3,19 @@ package com.dimovski.sportko.db.model;
 public class User {
 
     private String email;
-    private String name;
-    private String surname;
+    private String username;
 
+    public User() {
+
+    }
     public User(String email) {
         this.email = email;
-        this.name = "John";
-        this.surname = "Doe";
+        this.username = "test";
     }
 
-    public User(String email, String name, String surname) {
+    public User(String email, String username) {
         this.email = email;
-        this.name = name;
-        this.surname = surname;
+        this.username = username;
     }
 
     public String getEmail() {
@@ -26,19 +26,13 @@ public class User {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getSurname() {
-        return surname;
-    }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
 }

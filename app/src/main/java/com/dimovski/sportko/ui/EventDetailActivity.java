@@ -18,10 +18,10 @@ import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.FirebaseRepository;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
-import com.dimovski.sportko.viewmodel.EventViewModel;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -50,6 +50,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     TextView location;
     @BindView(R.id.attendingEvent)
     Button attendingEvent;
+    @BindView(R.id.createdBy)
+    TextView createdBy;
 
     Event event;
     int eventId;
@@ -80,9 +82,9 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                 if (event!=null){
                     initUi(event);
                 }
-
             }
         });
+
     }
 
     @Override
@@ -110,6 +112,11 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         initUi(event);
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(User user) {
+        createdBy.setText(String.format("%s %s", getString(R.string.created_by), user.getUsername()));
+    }
+
     private void initUi(Event event) {
         this.event=event;
         title.setText(event.getTitle());
@@ -120,10 +127,10 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         int noOfAtendees = event.getAttendees().size();
         attending.setText(String.format("%d / %d", noOfAtendees, event.getMaxAttendees()));
         location.setText(event.getLocationName());
-
         if (event.getAttendees().indexOf(currentUser)>-1) {
             setAttending(true);
         } else setAttending(false);
+        repository.getUser(event.getCreatedBy());
     }
 
     private void setAttending(boolean shouldAttend) {

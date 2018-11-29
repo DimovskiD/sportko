@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
+import com.dimovski.sportko.data.Constants;
 
 public class BaseActivity  extends AppCompatActivity {
 
