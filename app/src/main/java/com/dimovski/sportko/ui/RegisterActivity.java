@@ -15,7 +15,7 @@ import butterknife.Unbinder;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.User;
-import com.dimovski.sportko.db.repository.FirebaseRepository;
+import com.dimovski.sportko.db.repository.Repository;
 import com.dimovski.sportko.utils.StringUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class RegisterActivity extends BaseActivity implements View.OnClickListener {
 
     private FirebaseAuth authentication;
-    private FirebaseRepository repo;
+    private Repository repo = Repository.getInstance();
 
     private Unbinder unbinder;
 
@@ -52,7 +52,6 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         signup.setOnClickListener(this);
         login.setOnClickListener(this);
 
-        repo = new FirebaseRepository();
 
     }
 

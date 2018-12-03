@@ -19,7 +19,8 @@ import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.model.User;
-import com.dimovski.sportko.db.repository.FirebaseRepository;
+import com.dimovski.sportko.db.repository.Repository;
+import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
 import org.greenrobot.eventbus.EventBus;
@@ -29,7 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 public class EventDetailActivity extends BaseActivity implements View.OnClickListener {
 
     Unbinder unbinder;
-    FirebaseRepository repository = new FirebaseRepository();
+    Repository repository = Repository.getInstance();
     EventDetailViewModel viewModel;
 
     @BindView(R.id.event_photo_edit)
@@ -54,7 +55,6 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     TextView createdBy;
 
     Event event;
-    int eventId;
     SharedPreferences sharedPreferences;
     String currentUser;
 
@@ -115,6 +115,12 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(User user) {
         createdBy.setText(String.format("%s %s", getString(R.string.created_by), user.getUsername()));
+    }
+
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
+        Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_LONG).show();
     }
 
     private void initUi(Event event) {

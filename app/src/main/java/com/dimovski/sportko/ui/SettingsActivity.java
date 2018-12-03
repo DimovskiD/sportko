@@ -4,13 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,10 +24,7 @@ import butterknife.Unbinder;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.User;
-import com.dimovski.sportko.db.repository.FirebaseRepository;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.dimovski.sportko.db.repository.Repository;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -42,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.locationSwitch)
     SwitchCompat switchCompat;
 
-    private FirebaseRepository repo;
+    private Repository repo;
 
     SharedPreferences sharedPreferences;
     Unbinder unbinder;
@@ -61,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         else
             username.setText(user);
         done.setOnClickListener(this);
-        repo = new FirebaseRepository();
+        repo = Repository.getInstance();
 
         switchCompat.setChecked(sharedPreferences.getBoolean(Constants.LOCATION,false));
 
@@ -106,7 +101,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         boolean valid = true;
         if (username.getText()==null || username.getText().toString().equals(""))
         {
-            username.setError("This field cannot be empty");
+            username.setError(getString(R.string.required_field));
             valid=false;
         }
         return valid;
@@ -136,7 +131,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 //                            public void onSuccess(Location location) {
 //                                startAutoCompleteFragment(location);
 //                            }
-//                        });
+//                        }); todo use location to tailor results
 //
 //                    }
                     switchCompat.setChecked(true);

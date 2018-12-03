@@ -1,12 +1,9 @@
 package com.dimovski.sportko.ui;
 
-import android.Manifest;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +11,6 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -36,12 +32,8 @@ import com.dimovski.sportko.adapter.ItemClickHandler;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.internal.DrawerItem;
-import com.dimovski.sportko.utils.LocationUtils;
 import com.dimovski.sportko.utils.NetworkUtils;
 import com.dimovski.sportko.viewmodel.EventViewModel;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import org.greenrobot.eventbus.EventBus;
 
@@ -74,7 +66,6 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     TextView emptyRv;
 
     private DrawerItem selectedItem = DrawerItem.LIST_EVENTS;
-    private String locCity = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,50 +74,37 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         unbinder = ButterKnife.bind(this);
 
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);
+
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-        navigationView.getMenu().getItem(0).setChecked(true);
-        fab.setOnClickListener(this);
 
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
         currentUser = sharedPreferences.getString(Constants.EMAIL,"");
-
-
+        TextView tv = navigationView.getHeaderView(0).findViewById(R.id.greeting);
+        tv.setText(String.format("%s %s", getString(R.string.hello), currentUser));
 
         viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
-
-
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                updateObservers();
-                if (refreshLayout.isRefreshing())
-                    refreshLayout.setRefreshing(false);
-
-            }
-        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         progressBar.setVisibility(View.VISIBLE);
 
-
-
         if (!NetworkUtils.checkInternetConnection(this)){
             showSnackbar();
         }
-
+        setListeners();
     }
 
     private void updateObservers() {
         if (selectedItem == DrawerItem.LIST_EVENTS){
-            viewModel.getUpcomingEvents(locCity).observe(ListActivity.this, eventObserver);
+            viewModel.getUpcomingEvents().observe(ListActivity.this, eventObserver);
             viewModel.getMyEvents(currentUser).removeObservers(ListActivity.this);
         }
         else {
             viewModel.getMyEvents(currentUser).observe(ListActivity.this,eventObserver);
-            viewModel.getUpcomingEvents(locCity).removeObservers(ListActivity.this);
+            viewModel.getUpcomingEvents().removeObservers(ListActivity.this);
         }
     }
 
@@ -140,45 +118,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     @Override
     protected void onResume() {
         super.onResume();
-
-        eventObserver = new Observer<List<Event>>() {
-            @Override
-            public void onChanged(@Nullable List<Event> events) {
-                if (progressBar.getVisibility()==View.VISIBLE) {
-                    progressBar.setVisibility(View.GONE);
-                    if (events.size()<1) {
-                        emptyRv.setVisibility(View.VISIBLE);
-                    } else emptyRv.setVisibility(View.GONE);
-                } else {
-                    if (events.size()<1) {
-                        emptyRv.setVisibility(View.VISIBLE);
-                    } else emptyRv.setVisibility(View.GONE);
-                }
-                if (adapter!=null)
-                    adapter.setEvents(events);
-                else {
-                    adapter = new EventAdapter(events,ListActivity.this);
-                    recyclerView.setAdapter(adapter);
-                }
-                if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
-            }
-        };
-
-        if (selectedItem == DrawerItem.LIST_EVENTS) {
-            toolbar.setTitle(R.string.upcoming_events);
-            viewModel.getUpcomingEvents(locCity).observe(this, eventObserver);
-        }
-        else if (selectedItem == DrawerItem.MY_EVENTS) {
-            toolbar.setTitle(R.string.my_events);
-            viewModel.getMyEvents(currentUser).observe(this,eventObserver);
-        } else if (selectedItem ==DrawerItem.SETTINGS) {
-            viewModel.getUpcomingEvents(locCity).removeObservers(this);
-            viewModel.getMyEvents(currentUser).removeObservers(this);
-            toolbar.setTitle(R.string.action_settings);
-        }
-
+        setObserver();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -198,7 +139,34 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        checkItem(menuItem);
+        switch (menuItem.getItemId()) {
+            case R.id.logOut:
+                FirebaseAuth.getInstance().signOut();
+                clearPreferences();
+                navigateToLoginActivity();
+                break;
+            case R.id.List:
+                viewModel.getMyEvents(currentUser).removeObservers(this);
+                viewModel.getUpcomingEvents().observe(this,eventObserver);
+                selectedItem = DrawerItem.LIST_EVENTS;
+                toolbar.setTitle(R.string.upcoming_events);
+                break;
+            case R.id.myEvents:
+                viewModel.getUpcomingEvents().removeObservers(this);
+                viewModel.getMyEvents(currentUser).observe(this,eventObserver);
+                selectedItem = DrawerItem.MY_EVENTS;
+                toolbar.setTitle(R.string.my_events);
+                break;
+            case R.id.settings:
+                startSettingsActivity();
+                break;
+        }
+        drawerLayout.closeDrawers();
+        return true;
+    }
 
+    private void checkItem(MenuItem menuItem) {
         int size = navigationView.getMenu().size();
         for (int i = 0; i < size; i++) {
             navigationView.getMenu().getItem(i).setChecked(false);
@@ -208,43 +176,12 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
             menuItem.setChecked(true);
         else {
             if (selectedItem == DrawerItem.LIST_EVENTS) navigationView.getMenu().getItem(0).setChecked(true);
-
             else if (selectedItem == DrawerItem.MY_EVENTS) navigationView.getMenu().getItem(1).setChecked(true);
-
         }
-
-        switch (menuItem.getItemId()) {
-            case R.id.logOut:
-                FirebaseAuth.getInstance().signOut();
-                clearPreferences();
-                navigateToLoginActivity();
-                break;
-            case R.id.List:
-                viewModel.getMyEvents(currentUser).removeObservers(this);
-                viewModel.getUpcomingEvents(locCity).observe(this,eventObserver);
-                selectedItem = DrawerItem.LIST_EVENTS;
-                toolbar.setTitle(R.string.upcoming_events);
-                break;
-            case R.id.myEvents:
-                viewModel.getUpcomingEvents(locCity ).removeObservers(this);
-                viewModel.getMyEvents(currentUser).observe(this,eventObserver);
-                selectedItem = DrawerItem.MY_EVENTS;
-                toolbar.setTitle(R.string.my_events);
-                break;
-            case R.id.settings:
-//                selectedItem = DrawerItem.SETTINGS;
-//                viewModel.getUpcomingEvents().removeObservers(this);
-//                viewModel.getMyEvents(currentUser).removeObservers(this);
-//                toolbar.setTitle(R.string.action_settings);
-                startSettingsActivity();
-                break;
-        }
-        drawerLayout.closeDrawers();
-        return true;
     }
 
     private void clearPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
         SharedPreferences.Editor editor =  sharedPreferences.edit();
         editor.putString(Constants.EMAIL,"");
         editor.putString(Constants.USER,"");
@@ -256,7 +193,6 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         startActivity(i);
     }
 
-
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -265,7 +201,6 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 break;
         }
     }
-
 
     private void navigateToLoginActivity() {
         Intent i = new Intent(this,LoginActivity.class);
@@ -281,13 +216,62 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     @Override
     public void itemClicked(Event event) {
         Intent i;
-        if (event.getCreatedBy().equals(currentUser)) {
-             i = new Intent(this, AddEventActivity.class);
-        }
-        else {
-            i = new Intent(this,EventDetailActivity.class);
-        }
+        if (event.getCreatedBy().equals(currentUser)) i = new Intent(this, AddEventActivity.class);
+        else i = new Intent(this, EventDetailActivity.class);
         startActivity(i);
         EventBus.getDefault().postSticky(event);
+    }
+
+
+    private void setListeners() {
+        fab.setOnClickListener(this);
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateObservers();
+                if (refreshLayout.isRefreshing())
+                    refreshLayout.setRefreshing(false);
+
+            }
+        });
+    }
+
+    private void setObserver() {
+        eventObserver = new Observer<List<Event>>() {
+            @Override
+            public void onChanged(@Nullable List<Event> events) {
+                if (progressBar.getVisibility()==View.VISIBLE) {
+                    progressBar.setVisibility(View.GONE);
+                    if (events!=null && events.size()<1) {
+                        emptyRv.setVisibility(View.VISIBLE);
+                    } else emptyRv.setVisibility(View.GONE);
+                } else {
+                    if (events!=null && events.size()<1) {
+                        emptyRv.setVisibility(View.VISIBLE);
+                    } else emptyRv.setVisibility(View.GONE);
+                }
+                if (adapter!=null)
+                    adapter.setEvents(events);
+                else {
+                    adapter = new EventAdapter(events,ListActivity.this);
+                    recyclerView.setAdapter(adapter);
+                }
+                if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
+            }
+        };
+
+        if (selectedItem == DrawerItem.LIST_EVENTS) {
+            toolbar.setTitle(R.string.upcoming_events);
+            viewModel.getUpcomingEvents().observe(this, eventObserver);
+        }
+        else if (selectedItem == DrawerItem.MY_EVENTS) {
+            toolbar.setTitle(R.string.my_events);
+            viewModel.getMyEvents(currentUser).observe(this,eventObserver);
+        } else if (selectedItem ==DrawerItem.SETTINGS) {
+            viewModel.getUpcomingEvents().removeObservers(this);
+            viewModel.getMyEvents(currentUser).removeObservers(this);
+            toolbar.setTitle(R.string.action_settings);
+        }
     }
 }

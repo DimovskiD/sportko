@@ -1,13 +1,10 @@
 package com.dimovski.sportko.ui;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -15,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -28,8 +24,9 @@ import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
-import com.dimovski.sportko.db.repository.FirebaseRepository;
+import com.dimovski.sportko.db.repository.Repository;
 import com.dimovski.sportko.internal.Mode;
+import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.utils.LocationUtils;
 import com.dimovski.sportko.utils.PhotoUtils;
@@ -42,8 +39,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,19 +46,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 
 public class AddEventActivity extends BaseActivity implements View.OnClickListener {
 
 
     Unbinder unbinder;
-    FirebaseRepository repository = new FirebaseRepository();
+    Repository repository = Repository.getInstance();
 
 
     @BindView(R.id.input_event_title)
@@ -100,15 +91,18 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
         setContentView(R.layout.activity_add_event);
         unbinder = ButterKnife.bind(this);
-        createEvent.setOnClickListener(this);
-        scheduledTime.setOnClickListener(this);
-        maxAtendees.setOnClickListener(this);
-        autoCompletePlaces.setOnClickListener(this);
+        setListeners();
         setUpSpinner();
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
         mode = Mode.CREATE;
 
+    }
 
+    private void setListeners() {
+        createEvent.setOnClickListener(this);
+        scheduledTime.setOnClickListener(this);
+        maxAtendees.setOnClickListener(this);
+        autoCompletePlaces.setOnClickListener(this);
     }
 
 
@@ -124,6 +118,11 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         EventBus.getDefault().removeStickyEvent(event);
         mode = Mode.UPDATE;
         initUi();
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
+        Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_LONG).show();
     }
 
     private void initUi() {
@@ -195,25 +194,29 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             case R.id.input_max_atendees:
                 break;
             case R.id.input_auto_complete:
-                if (sharedPreferences.getBoolean(Constants.LOCATION,false)) {
-                if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED)) {
-                        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-                        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                startAutoCompleteFragment(location);
-                            }
-                        });
-                }
-                else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(Constants.locPermission, Constants.LOCATION_PERMISSION);
-                    }
-                } } else startAutoCompleteFragment(null);
+                callPlacesApi();
                 break;
         }
+    }
+
+    private void callPlacesApi() {
+        if (sharedPreferences.getBoolean(Constants.LOCATION,false)) {
+            if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED)) {
+                FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        startAutoCompleteFragment(location);
+                    }
+                });
+            }
+            else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(Constants.locPermission, Constants.LOCATION_PERMISSION);
+                }
+            } } else startAutoCompleteFragment(null);
     }
 
     private void startAutoCompleteFragment(Location location) {
@@ -238,9 +241,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
             startActivityForResult(intent, Constants.PLACE_AUTOCOMPLETE_REQUEST_CODE);
         } catch (GooglePlayServicesRepairableException e) {
-            // TODO: Handle the error.
+            Toast.makeText(this,R.string.error,Toast.LENGTH_SHORT).show();
         } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
+            Toast.makeText(this,R.string.google_play_not_available,Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -250,9 +253,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             crEditEvent();
             navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
         }
-
     }
-
 
     private void showDateTimePicker() {
         dateTimeDialog = new SingleDateAndTimePickerDialog.Builder(AddEventActivity.this)
@@ -280,15 +281,11 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     private void crEditEvent() {
 
         String createdBy = sharedPreferences.getString(Constants.EMAIL, "");
-
         Resources resources = getResources();
         Uri uri = PhotoUtils.getUriForId(resources, photoResourceId);
-
         Event e;
         if (mode == Mode.CREATE) {
-
             String city = LocationUtils.getCityForLocation(this,lat,lon);
-
             e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
                     lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
                     categorySpinner.getSelectedItem().toString(), createdBy, city);
@@ -330,7 +327,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             maxAtendees.setError(getString(R.string.required_field));
         } else if (Integer.parseInt(maxAtendees.getText().toString()) <= 0) {
             valid = false;
-            maxAtendees.setError("The number of open positions must be greater than 0");
+            maxAtendees.setError(getString(R.string.number_position_greater_zero));
         } else maxAtendees.setError(null);
 
         if (autoCompletePlaces.getText() == null || autoCompletePlaces.getText().toString().equals("")) {
@@ -347,16 +344,20 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         switch (requestCode) {
             case Constants.PLACE_AUTOCOMPLETE_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    Place p = PlaceAutocomplete.getPlace(AddEventActivity.this, data);
-                    if (p != null) {
-                        autoCompletePlaces.setText(p.getName());
-                        lat = p.getLatLng().latitude;
-                        lon = p.getLatLng().longitude;
+                    if (data!=null) {
+                        Place p = PlaceAutocomplete.getPlace(AddEventActivity.this, data);
+                        if (p != null) {
+                            autoCompletePlaces.setText(p.getName());
+                            lat = p.getLatLng().latitude;
+                            lon = p.getLatLng().longitude;
+                        }
                     }
                 } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                    Status status = PlaceAutocomplete.getStatus(this, data);
-                    // TODO: Handle the error.
-                    Log.i("ERROR", status.getStatusMessage());
+                    if (data!=null) {
+                        Status status = PlaceAutocomplete.getStatus(this, data);
+                        Toast.makeText(this, status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+                        Log.i("ERROR", status.getStatusMessage());
+                    }
                 }
                 break;
 
@@ -379,9 +380,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                                 startAutoCompleteFragment(location);
                             }
                         });
-
                     }
-
                 } else {
                     Toast.makeText(AddEventActivity.this,R.string.denied_pemission,Toast.LENGTH_LONG).show();
                     startAutoCompleteFragment(null);

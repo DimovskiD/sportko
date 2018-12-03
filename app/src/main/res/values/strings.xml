@@ -53,4 +53,10 @@
     <string name="created_by">Created by:</string>
     <string name="auth_failed">Authentication failed.</string>
     <string name="denied_pemission">Permission denied. Place suggestions will not be relevant to your location</string>
+    <string name="error">An error has occurred. Please try again.</string>
+    <string name="google_play_not_available">Google Play Services are not available. Please install Google Play Services
+        in order to use this feature.
+    </string>
+    <string name="number_position_greater_zero">The number of open positions must be greater than 0</string>
+    <string name="hello">Hello</string>
 </resources>

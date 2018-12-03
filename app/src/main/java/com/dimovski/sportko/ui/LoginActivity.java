@@ -72,8 +72,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-
-
     private void validateLoginDetails() {
         boolean error=false;
         if (emailTV.getText() == null || StringUtils.isEmpty(emailTV.getText().toString())) {
