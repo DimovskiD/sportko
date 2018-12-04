@@ -122,7 +122,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
-        Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_LONG).show();
+        Toast.makeText(this,noInternetConnectionEvent.getMessage(),Toast.LENGTH_LONG).show();
     }
 
     private void initUi() {

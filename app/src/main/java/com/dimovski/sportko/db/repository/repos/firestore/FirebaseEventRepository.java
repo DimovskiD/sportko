@@ -38,7 +38,7 @@ public class FirebaseEventRepository {
         eventsRef.document(event.getId()).set(event);
     }
 
-    public void insertEvent(Event event) {
+    public String insertEvent(Event event) {
 
         DocumentReference e = firestoreDatabase.collection(DbConstants.EVENTS).document();
         event.setId(e.getId());
@@ -56,6 +56,7 @@ public class FirebaseEventRepository {
                         Log.w(TAG, "Error adding event", e);
                     }
                 });
+        return e.getId();
     }
 
 
@@ -192,5 +193,22 @@ public class FirebaseEventRepository {
 
 
         return events;
+    }
+
+    public void deleteEvent(Event entity) {
+        eventsRef.document(entity.getId())
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.i(TAG,"event deleted");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting event", e);
+                    }
+                });
     }
 }

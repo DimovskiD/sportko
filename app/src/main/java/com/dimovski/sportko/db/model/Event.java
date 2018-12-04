@@ -1,10 +1,22 @@
 package com.dimovski.sportko.db.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
+import android.support.annotation.NonNull;
+import com.dimovski.sportko.db.converter.Converters;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 
+@Entity(tableName = "events")
+@TypeConverters(Converters.class)
 public class Event {
 
+
+    @PrimaryKey
+    @NonNull
     private String id;
     private String title;
     private String description;

@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -98,6 +99,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     }
 
     private void updateObservers() {
+        try {
         if (selectedItem == DrawerItem.LIST_EVENTS){
             viewModel.getUpcomingEvents().observe(ListActivity.this, eventObserver);
             viewModel.getMyEvents(currentUser).removeObservers(ListActivity.this);
@@ -105,6 +107,9 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         else {
             viewModel.getMyEvents(currentUser).observe(ListActivity.this,eventObserver);
             viewModel.getUpcomingEvents().removeObservers(ListActivity.this);
+        } }
+        catch (NullPointerException e) {
+            Log.d("LIST",e.getMessage());
         }
     }
 
@@ -147,16 +152,14 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 navigateToLoginActivity();
                 break;
             case R.id.List:
-                viewModel.getMyEvents(currentUser).removeObservers(this);
-                viewModel.getUpcomingEvents().observe(this,eventObserver);
                 selectedItem = DrawerItem.LIST_EVENTS;
+                updateObservers();
                 toolbar.setTitle(R.string.upcoming_events);
                 break;
             case R.id.myEvents:
-                viewModel.getUpcomingEvents().removeObservers(this);
-                viewModel.getMyEvents(currentUser).observe(this,eventObserver);
                 selectedItem = DrawerItem.MY_EVENTS;
                 toolbar.setTitle(R.string.my_events);
+                updateObservers();
                 break;
             case R.id.settings:
                 startSettingsActivity();

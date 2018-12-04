@@ -120,7 +120,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
-        Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_LONG).show();
+        Toast.makeText(this,noInternetConnectionEvent.getMessage(),Toast.LENGTH_LONG).show();
     }
 
     private void initUi(Event event) {

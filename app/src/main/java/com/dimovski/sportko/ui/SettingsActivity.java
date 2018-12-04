@@ -50,6 +50,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setTitle(R.string.action_settings);
+
         String email = sharedPreferences.getString(Constants.EMAIL,"");
         String user = sharedPreferences.getString(Constants.USER,"");
         if (user.equals("")) username.setText(email);

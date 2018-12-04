@@ -1,7 +1,15 @@
 package com.dimovski.sportko.db.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+
+@Entity(tableName = "users")
 public class User {
 
+    @PrimaryKey
+    @NonNull
     private String email;
     private String username;
 

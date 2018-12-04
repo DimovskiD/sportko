@@ -59,4 +59,12 @@
     </string>
     <string name="number_position_greater_zero">The number of open positions must be greater than 0</string>
     <string name="hello">Hello</string>
+    <string name="cant_edit_offline">You cannot edit events while offline. Please connect to the Internet in order to
+        make changes.
+    </string>
+    <string name="cant_insert_offline">You cannot create events while offline. Please connect to the Internet in order to
+        make changes.</string>
+    <string name="cant_delete_offline">You cannot delete events while offline. Please connect to the Internet in order to
+        make changes.</string>
+
 </resources>

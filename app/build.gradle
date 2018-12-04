@@ -63,4 +63,8 @@ dependencies {
     //eventbus
     implementation 'org.greenrobot:eventbus:3.1.1'
 
+    // Room components
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
+
 }
