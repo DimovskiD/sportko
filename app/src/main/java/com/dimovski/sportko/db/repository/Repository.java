@@ -55,12 +55,12 @@ public class Repository {
     }
 
 
-    public void insertEvent(Event event) {
-        eventRepository.insert(event);
+    public long insertEvent(Event event) {
+        return eventRepository.insert(event);
     }
 
-    public void deleteEvent(Event event) {
-        eventRepository.delete(event);
+    public int deleteEvent(Event event) {
+        return eventRepository.delete(event);
     }
 
 
@@ -68,14 +68,17 @@ public class Repository {
         return eventRepository.get(eventId);
     }
 
-    public void updateEvent(Event event) {
-        eventRepository.update(event);
+    public int updateEvent(Event event) {
+        return eventRepository.update(event);
     }
 
-    public void upSertUser(User user) {
+    public void insertUser(User user) {
         userRepository.insert(user);
     }
 
+    public void updateUser(User user) {
+        userRepository.update(user);
+    }
     public void getUser(String email) {
         userRepository.get(email);
     }

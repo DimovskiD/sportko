@@ -114,7 +114,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     }
 
     private void showSnackbar() {
-        Snackbar s  = Snackbar.make(refreshLayout,R.string.no_internet,BaseTransientBottomBar.LENGTH_LONG);
+        Snackbar s  = Snackbar.make(drawerLayout,R.string.no_internet,BaseTransientBottomBar.LENGTH_LONG);
         View v = s.getView();
         v.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         s.show();
@@ -124,6 +124,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     protected void onResume() {
         super.onResume();
         setObserver();
+
+
     }
 
     @Override

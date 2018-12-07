@@ -1,6 +1,8 @@
 package com.dimovski.sportko.ui;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -25,11 +27,13 @@ import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.Repository;
+import com.dimovski.sportko.internal.FirebaseTopic;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
-import com.dimovski.sportko.utils.DateTimeUtils;
-import com.dimovski.sportko.utils.LocationUtils;
-import com.dimovski.sportko.utils.PhotoUtils;
+import com.dimovski.sportko.rest.ApiInterface;
+import com.dimovski.sportko.rest.Client;
+import com.dimovski.sportko.rest.SendMessageResponse;
+import com.dimovski.sportko.utils.*;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -41,13 +45,29 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.RequestBody;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 
 
 public class AddEventActivity extends BaseActivity implements View.OnClickListener {
@@ -63,6 +83,8 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     TextInputEditText description;
     @BindView(R.id.createEvent)
     Button createEvent;
+    @BindView(R.id.deleteEvent)
+    Button deleteEvent;
     @BindView(R.id.event_photo_create)
     ImageView photo;
     @BindView(R.id.category_spinner)
@@ -96,6 +118,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
         mode = Mode.CREATE;
 
+
     }
 
     private void setListeners() {
@@ -103,6 +126,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         scheduledTime.setOnClickListener(this);
         maxAtendees.setOnClickListener(this);
         autoCompletePlaces.setOnClickListener(this);
+        deleteEvent.setOnClickListener(this);
     }
 
 
@@ -135,8 +159,12 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         lon = event.getLon();
         scheduledTime.setText(String.format("%s %s", DateTimeUtils.formatDate(event.getScheduled(), this), DateTimeUtils.formatTime(event.getScheduled(), this)));
         maxAtendees.setText(String.format("%d", event.getMaxAttendees()));
+        deleteEvent.setText(R.string.delete_event);
+        deleteEvent.setVisibility(View.VISIBLE);
+//        deleteEvent.setClickable(true);
         createEvent.setText(R.string.edit_event);
     }
+
 
     private void setUpSpinner() {
         adapter = ArrayAdapter.createFromResource(this,
@@ -196,7 +224,35 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             case R.id.input_auto_complete:
                 callPlacesApi();
                 break;
+            case R.id.deleteEvent:
+                deleteButtonClicked();
+                break;
         }
+    }
+
+    private void deleteButtonClicked() {
+        AlertDialog.Builder builder = new AlertDialog.Builder( this, android.R.style.Widget_Material_ButtonBar_AlertDialog)
+                .setTitle(getString(R.string.delete_event))
+                .setMessage(R.string.cannot_be_undone_delete)
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int res = repository.deleteEvent(event);
+                        if (res!=0)
+                            navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+        AlertDialog alertDialog = builder.show();
+        alertDialog.getButton(BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+        alertDialog.getButton(BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+
     }
 
     private void callPlacesApi() {
@@ -250,8 +306,11 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     private void crEditButtonClicked() {
         if (validateInput()) {
-            crEditEvent();
-            navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
+            long res = crEditEvent();
+            if (res!=0) {
+                if (mode == Mode.UPDATE) FirebaseUtils.sendFCM(event);
+                navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
+            }
         }
     }
 
@@ -278,8 +337,8 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         else super.onBackPressed();
     }
 
-    private void crEditEvent() {
-
+    private long crEditEvent() {
+        long res = 0;
         String createdBy = sharedPreferences.getString(Constants.EMAIL, "");
         Resources resources = getResources();
         Uri uri = PhotoUtils.getUriForId(resources, photoResourceId);
@@ -289,7 +348,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
                     lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
                     categorySpinner.getSelectedItem().toString(), createdBy, city);
-            repository.insertEvent(e);
+            res = repository.insertEvent(e);
         } else {
             event.setTitle(title.getText().toString());
             event.setDescription(description.getText().toString());
@@ -303,8 +362,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             String maxAtt = maxAtendees.getText().toString();
             Log.i("MAX_ATT", maxAtt);
             event.setMaxAttendees(Integer.parseInt(maxAtt));
-            repository.updateEvent(event);
+            res = repository.updateEvent(event);
         }
+        return res;
 
     }
 

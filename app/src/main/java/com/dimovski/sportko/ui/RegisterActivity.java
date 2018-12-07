@@ -97,7 +97,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                         editor.putString(Constants.EMAIL, user.getEmail());
                         editor.putString(Constants.USER,username.getText().toString());
                         editor.apply();
-                        repo.upSertUser(new User(user.getEmail(),username.getText().toString()));
+                        repo.insertUser(new User(user.getEmail(),username.getText().toString()));
                         startListActivity();
                     } else {
                         // If sign in fails, display a message to the user.

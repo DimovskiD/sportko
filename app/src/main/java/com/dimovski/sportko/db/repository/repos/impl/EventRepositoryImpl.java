@@ -6,6 +6,7 @@ import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.repos.EventRepository;
 import com.dimovski.sportko.db.repository.repos.firestore.FirebaseEventRepository;
 import com.dimovski.sportko.db.repository.repos.local.LocalEventRepositoryImpl;
+import com.dimovski.sportko.internal.FirebaseTopic;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
@@ -45,34 +46,39 @@ public class EventRepositoryImpl implements EventRepository {
 
 
     @Override
-    public void insert(Event entity) {
+    public long insert(Event entity) {
         if (checkInternetConnection(getContext())) {
             String id = firebaseEventRepository.insertEvent(entity);
             entity.setId(id);
-            localEventRepository.insert(entity);
+            return localEventRepository.insert(entity);
         } else {
             EventBus.getDefault().post(new NoInternetConnectionEvent(getContext().getResources().getString(R.string.cant_insert_offline)));
+            return 0;
         }
     }
 
     @Override
-    public void update(Event entity) {
+    public int update(Event entity) {
         if (checkInternetConnection(getContext())) {
             firebaseEventRepository.updateEvent(entity);
-            localEventRepository.update(entity);
+            return localEventRepository.update(entity);
         } else {
             EventBus.getDefault().post(new NoInternetConnectionEvent(getContext().getResources().getString(R.string.cant_edit_offline)));
+            return 0;
         }
     }
 
     @Override
-    public void delete(Event entity) {
+    public int delete(Event entity) {
         if (checkInternetConnection(getContext())) {
             firebaseEventRepository.deleteEvent(entity);
             localEventRepository.delete(entity);
+            return 1;
         }
-        else EventBus.getDefault().post(new NoInternetConnectionEvent(getContext().getResources().getString(R.string.cant_delete_offline)));
-
+        else {
+            EventBus.getDefault().post(new NoInternetConnectionEvent(getContext().getResources().getString(R.string.cant_delete_offline)));
+            return 0;
+        }
     }
 
     @Override

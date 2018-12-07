@@ -20,9 +20,11 @@ import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.NoInternetConnectionEvent;
+import com.dimovski.sportko.rest.ApiInterface;
+import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -58,6 +60,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     SharedPreferences sharedPreferences;
     String currentUser;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +73,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         attendingEvent.setOnClickListener(this);
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
         currentUser = sharedPreferences.getString(Constants.EMAIL,"");
+
     }
 
 
@@ -118,10 +122,13 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     }
 
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
-        Toast.makeText(this,noInternetConnectionEvent.getMessage(),Toast.LENGTH_LONG).show();
+
+    private void subscribeToTopic(String topic,Boolean shouldSubscribe) {
+        if (shouldSubscribe)
+            FirebaseMessaging.getInstance().subscribeToTopic(topic);
+        else  FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
     }
+
 
     private void initUi(Event event) {
         this.event=event;
@@ -137,6 +144,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             setAttending(true);
         } else setAttending(false);
         repository.getUser(event.getCreatedBy());
+
+
     }
 
     private void setAttending(boolean shouldAttend) {
@@ -166,6 +175,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         event.addAttendee(currentUser);
                         setAttending(true);
                         repository.updateEvent(event);
+                        subscribeToTopic(event.getId(),true);
                     } else {
                         Toast.makeText(this, R.string.cannot_attend_full_event, Toast.LENGTH_LONG).show();
                     }
@@ -176,6 +186,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     event.removeAtendee(currentUser);
                     setAttending(false);
                     repository.updateEvent(event);
+                    subscribeToTopic(event.getId(),false);
                 }
         }
     }

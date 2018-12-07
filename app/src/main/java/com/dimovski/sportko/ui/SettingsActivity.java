@@ -115,7 +115,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         editor.apply();
         User u = new User(sharedPreferences.getString(Constants.EMAIL,""));
         u.setUsername(username.getText().toString());
-        repo.upSertUser(u);
+        repo.updateUser(u);
     }
 
     @Override

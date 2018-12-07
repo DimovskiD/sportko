@@ -45,8 +45,6 @@
     <string name="upcoming_events">Upcoming events</string>
     <string name="my_events">My Events</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="username">Username</string>
     <string name="use_location">Use location?</string>
     <string name="number_of_attendees">Number of attendees</string>
@@ -66,5 +64,14 @@
         make changes.</string>
     <string name="cant_delete_offline">You cannot delete events while offline. Please connect to the Internet in order to
         make changes.</string>
+    <string name="cant_register_offline">You cannot register while offline. Please connect to the Internet in order to
+        make changes.</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="cannot_be_undone_delete">This action cannot be undone. Please confirm if you really want to delete
+        this event.
+    </string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

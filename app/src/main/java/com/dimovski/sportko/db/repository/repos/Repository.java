@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface Repository<T> {
 
-    void insert(T entity);
-    void update (T entity);
-    void delete(T entity);
+    long insert(T entity);
+    int update (T entity);
+    int delete(T entity);
     LiveData<T> get(String id);
     LiveData<List<T>> getAll();
 

@@ -12,13 +12,13 @@ import java.util.List;
 public interface EventDao {
 
     @Insert
-    void insert (Event event);
+    long insert (Event event);
 
     @Delete
-    void delete (Event event);
+    int delete (Event event);
 
     @Update
-    void update (Event event);
+    int update (Event event);
 
     @Query("SELECT * FROM events ORDER BY scheduled")
     List<Event> getAll ();

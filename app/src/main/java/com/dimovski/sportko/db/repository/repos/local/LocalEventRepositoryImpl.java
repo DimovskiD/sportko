@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class LocalEventRepositoryImpl implements EventRepository {
 
@@ -73,36 +74,60 @@ public class LocalEventRepositoryImpl implements EventRepository {
     }
 
     @Override
-    public void insert(final Event entity) {
-        AsyncTask<Void,Void,Void> getEvents = new AsyncTask() {
+    public long insert(final Event entity) {
+        AsyncTask<Void,Void,Long> getEvents = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
-                eventDao.insert(entity);
-                return null;
+                return eventDao.insert(entity);
             }
-        }.execute();
+        };
+        long result = 0;
+        try {
+            result = getEvents.execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
-    public void update(final Event entity) {
-        AsyncTask<Void,Void,Void> getEvents = new AsyncTask() {
+    public int update(final Event entity) {
+        AsyncTask<Void,Void,Integer> getEvents = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
-                eventDao.update(entity);
-                return null;
+                return eventDao.update(entity);
             }
-        }.execute();
+        };
+        int result = 0;
+        try {
+            result = getEvents.execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
-    public void delete(final Event entity) {
-        AsyncTask<Void,Void,Void> getEvents = new AsyncTask() {
+    public int delete(final Event entity) {
+        AsyncTask<Void,Void,Integer> getEvents = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
-                eventDao.delete(entity);
-                return null;
+                return eventDao.delete(entity);
             }
-        }.execute();
+        };
+        int result = 0;
+        try {
+             result = getEvents.execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.dimovski.sportko.db.model;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.NonNull;
@@ -34,10 +35,12 @@ public class Event {
 
     public Event() {}
 
-    public Event(String id) {
+    @Ignore
+    public Event(@NonNull  String id) {
         this.id = id;
     }
 
+    @Ignore
     public Event(String title, String description, Date created, Date scheduled, double lat, double lon, String locationName, String imgSrc, int maxAttendees, String typeOfEvent
     ,String createdBy, String city) {
         this.title = title;
@@ -56,11 +59,12 @@ public class Event {
         attendees.add(createdBy);
     }
 
+    @NonNull
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 

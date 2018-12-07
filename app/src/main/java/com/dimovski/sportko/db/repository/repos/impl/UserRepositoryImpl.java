@@ -2,8 +2,8 @@ package com.dimovski.sportko.db.repository.repos.impl;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.util.Log;
 import com.dimovski.sportko.BaseApp;
+import com.dimovski.sportko.R;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.repos.firestore.FirebaseUserRepository;
 import com.dimovski.sportko.db.repository.repos.UserRepository;
@@ -24,34 +24,34 @@ public class UserRepositoryImpl implements UserRepository {
         return repository;
     }
 
-
-
     @Override
-    public void insert(User entity) {
+    public long insert(User entity) {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
             firebaseUserRepository.upSertUser(entity);
         } else {
-            EventBus.getDefault().post(new NoInternetConnectionEvent()); //TODO update user locally, push to sever later
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.cant_register_offline)));
         }
+        return 0;
     }
 
     @Override
-    public void update(User entity) {
+    public int update(User entity) {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
             firebaseUserRepository.upSertUser(entity);
         } else {
-            EventBus.getDefault().post(new NoInternetConnectionEvent()); //TODO update user locally, push to sever later
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet))); //TODO update user locally, push to sever later
         }
+        return 0;
     }
 
     @Override
-    public void delete(User entity) {
+    public int delete(User entity) {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
 
         } else {
-            Log.e("REPO", "no connection"); //todo get user from local db
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet)));
         }
-        //TODO implement
+        return 0;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
             firebaseUserRepository.getUser(id);
         } else {
-            Log.e("REPO", "no connection"); //todo get user from local db and send via EventBus
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet)));
         }
         return new MutableLiveData<>(); //returns empty live data - the requested result is posted via EventBus
     }
@@ -70,8 +70,8 @@ public class UserRepositoryImpl implements UserRepository {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
             return firebaseUserRepository.getAllUsers();
         } else {
-            Log.e("REPO", "no connection"); //todo get user from local db
-            return null;
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet)));
+            return new MutableLiveData<>();
         }
     }
 }

@@ -160,6 +160,20 @@
                     android:layout_centerHorizontal="true"
                     android:backgroundTint="@color/colorPrimary"/>
 
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/create_event"
+                android:id="@+id/deleteEvent"
+                android:minWidth="200dp"
+                android:layout_below="@id/createEvent"
+                android:background="@android:color/holo_red_dark"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"/>
 
 
 

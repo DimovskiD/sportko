@@ -1,6 +1,7 @@
 package com.dimovski.sportko.db.model;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -14,23 +15,26 @@ public class User {
     private String username;
 
     public User() {
-
     }
-    public User(String email) {
+
+    @Ignore
+    public User(@NonNull  String email) {
         this.email = email;
         this.username = "test";
     }
 
-    public User(String email, String username) {
+    @Ignore
+    public User(@NonNull String email, String username) {
         this.email = email;
         this.username = username;
     }
 
+    @NonNull
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(@NonNull String email) {
         this.email = email;
     }
 
