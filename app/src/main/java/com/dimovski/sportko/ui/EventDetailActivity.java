@@ -3,6 +3,7 @@ package com.dimovski.sportko.ui;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,6 +26,8 @@ import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -74,21 +77,41 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
         currentUser = sharedPreferences.getString(Constants.EMAIL,"");
 
+
+        String json = getIntent().getStringExtra("event");
+        if (json!= null && !json.equals(""))
+            event= new GsonBuilder().create().fromJson(json, Event.class);
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (event!=null) {
+            setUpObserver();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        String json = getIntent().getStringExtra("event");
+        event= new Gson().fromJson(json, Event.class);
+    }
+
+    private void setUpObserver() {
         viewModel.getEvent(event.getId()).observe(this, new Observer<Event>() {
             @Override
             public void onChanged(@Nullable Event event) {
-                if (event!=null){
+                if (event != null) {
                     initUi(event);
                 }
             }
         });
-
     }
 
     @Override
@@ -113,7 +136,15 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     public void onMessageEvent(Event event) {
         this.event = event;
         EventBus.getDefault().removeStickyEvent(event);
-        initUi(event);
+        viewModel.getEvent(event.getId()).observe(this, new Observer<Event>() {
+            @Override
+            public void onChanged(@Nullable Event event) {
+                if (event != null) {
+                    initUi(event);
+                }
+            }
+        });
+//        initUi(event);
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

@@ -10,6 +10,7 @@ import com.dimovski.sportko.rest.ApiInterface;
 import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.rest.SendMessageResponse;
 import com.dimovski.sportko.service.GetFirebaseAccessToken;
+import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Call;
@@ -50,6 +51,10 @@ public class FirebaseUtils {
             if (action.equals(Constants.EDITED))   {
                 notificationAndroid.put("body", String.format(context.getString(R.string.event_edited_desc), event.getTitle()));
                 notificationAndroid.put("title", context.getString(R.string.event_edited));
+                JSONObject data = new JSONObject();
+                String eventJson = new Gson().toJson(event);
+                data.put("event",eventJson);
+                message.put("data",data);
             }
 
             else if (action.equals(Constants.DELETED)) {
@@ -57,7 +62,10 @@ public class FirebaseUtils {
                 notificationAndroid.put("title", context.getString(R.string.event_deleted));
             }
             notificationAndroid.put("sound","default");
+            notificationAndroid.put("click_action","DETAIL_ACTIVITY");
             android.put("notification",notificationAndroid);
+
+
             message.put("android",android);
 
             okhttp3.RequestBody body1 = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"),body.toString());

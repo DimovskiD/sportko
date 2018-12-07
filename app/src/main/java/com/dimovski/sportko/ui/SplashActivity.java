@@ -2,8 +2,11 @@ package com.dimovski.sportko.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import com.dimovski.sportko.R;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
 public class SplashActivity extends BaseActivity {
 
@@ -23,8 +26,19 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void checkUserLoggedIn() {
+
         if (auth.getCurrentUser()==null)
             startLoginActivity();
-        else startListActivity();
+        else {
+            auth.getCurrentUser().reload().addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    if (e instanceof FirebaseAuthInvalidUserException) {
+                        startLoginActivity();
+                    }
+                }
+            });
+            startListActivity();
+        }
     }
 }

@@ -14,13 +14,15 @@ import android.support.v4.app.NotificationCompat;
 import com.dimovski.sportko.BaseApp;
 import com.dimovski.sportko.R;
 
+import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.ui.EventDetailActivity;
 import com.dimovski.sportko.ui.ListActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
 
 public class NotificationUtils {
 
-    public static void sendNotification(RemoteMessage.Notification notification, String title, String desc){
+    public static void sendNotification(RemoteMessage.Notification notification, String title, String desc, String eventJson){
 
         Context context =BaseApp.getContext();
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -54,7 +56,8 @@ public class NotificationUtils {
                     .setDefaults(android.app.Notification.DEFAULT_ALL)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
 
-            Intent intent = new Intent(context,ListActivity.class);
+            Intent intent = new Intent(context,EventDetailActivity.class);
+            intent.putExtra("event",eventJson);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 

@@ -1,8 +1,12 @@
 package com.dimovski.sportko.service;
 
 import android.util.Log;
+import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.utils.NotificationUtils;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
+
+import java.util.Map;
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
 
@@ -12,7 +16,13 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         remoteMessage.getNotification();
-        NotificationUtils.sendNotification(remoteMessage.getNotification(),remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody());
+        Map data = remoteMessage.getData();
+        Event e = new Event();
+        String event = "";
+        if (data!=null)
+            event = (String) data.get("event");
+
+        NotificationUtils.sendNotification(remoteMessage.getNotification(),remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody(),event);
     }
 
 }
