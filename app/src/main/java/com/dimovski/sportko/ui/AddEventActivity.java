@@ -238,8 +238,10 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         int res = repository.deleteEvent(event);
-                        if (res!=0)
+                        if (res!=0) {
+                            FirebaseUtils.sendFCM(event, Constants.DELETED);
                             navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
+                        }
                     }
                 })
                 .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
@@ -308,7 +310,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         if (validateInput()) {
             long res = crEditEvent();
             if (res!=0) {
-                if (mode == Mode.UPDATE) FirebaseUtils.sendFCM(event);
+                if (mode == Mode.UPDATE) FirebaseUtils.sendFCM(event,Constants.EDITED);
                 navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
             }
         }

@@ -37,7 +37,7 @@
                   android:parentActivityName=".ui.ListActivity"
         />
 
-        <service android:name="com.dimovski.sportko.utils.FirebaseMessagingService">
+        <service android:name="com.dimovski.sportko.service.FirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

@@ -73,5 +73,9 @@
     </string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="event_edited">Event Edited</string>
+    <string name="event_deleted">Event Cancelled</string>
+    <string name="event_cancelled">The %s event you are attending has been cancelled.</string>
+    <string name="event_edited_desc">The %s event you are attending has been edited. Take a look!</string>
 
 </resources>

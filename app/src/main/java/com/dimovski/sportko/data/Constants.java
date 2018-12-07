@@ -14,6 +14,8 @@ public class Constants {
     public static final int LOCATION_PERMISSION = 333;
     public static final String USER = "USER";
     public static final String LOCATION = "USE_LOCATION";
+    public static final String DELETED = "DELETED";
+    public static final String EDITED = "EDITED";
     public static String EVENT_ID = "EVENT_ID";
 
     public static String[] locPermission = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
