@@ -49,6 +49,10 @@
         </service>
 
         <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel"
+                android:value="FIREBASE_FCM"/>
+
+        <meta-data
                 android:name="com.google.android.geo.API_KEY"
                 android:value="AIzaSyBEUPt_esTuoXoR8ahOaZ3P7yx4cDb79Ps"/>
 

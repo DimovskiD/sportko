@@ -21,6 +21,8 @@ public class Constants {
     public static final int SMS_PERMISSIONS_CODE_LISTENER = 222;
     public static final String SELECTED_ITEMS = "SELECTED_EVENTS";
     public static final String SEARCH_QUERY = "SEARCH_QUERY";
+    public static final String NEW_ATTENDEE = "NEW_ATTENDEE";
+    public static final String ATENDEE_CANCELLED = "ATTENDEE_CANCELLED";
     public static String EVENT_ID = "EVENT_ID";
 
     public static String[] locPermission = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};

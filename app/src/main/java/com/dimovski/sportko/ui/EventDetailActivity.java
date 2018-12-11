@@ -24,6 +24,7 @@ import com.dimovski.sportko.db.repository.Repository;
 import com.dimovski.sportko.rest.ApiInterface;
 import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.utils.DateTimeUtils;
+import com.dimovski.sportko.utils.FirebaseUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
@@ -155,11 +156,6 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
 
 
-    private void subscribeToTopic(String topic,Boolean shouldSubscribe) {
-        if (shouldSubscribe)
-            FirebaseMessaging.getInstance().subscribeToTopic(topic);
-        else  FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
-    }
 
 
     private void initUi(Event event) {
@@ -207,7 +203,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         event.addAttendee(currentUser);
                         setAttending(true);
                         repository.updateEvent(event);
-                        subscribeToTopic(event.getId(),true);
+                        FirebaseUtils.sendFCM(event,Constants.NEW_ATTENDEE);
+                        FirebaseUtils.subscribeToTopic(event.getId(),true);
                     } else {
                         Toast.makeText(this, R.string.cannot_attend_full_event, Toast.LENGTH_LONG).show();
                     }
@@ -218,7 +215,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     event.removeAtendee(currentUser);
                     setAttending(false);
                     repository.updateEvent(event);
-                    subscribeToTopic(event.getId(),false);
+                    FirebaseUtils.sendFCM(event,Constants.ATENDEE_CANCELLED);
+                    FirebaseUtils.subscribeToTopic(event.getId(),false);
                 }
         }
     }

@@ -27,13 +27,12 @@ import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.FirebaseTopic;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
-import com.dimovski.sportko.rest.ApiInterface;
-import com.dimovski.sportko.rest.Client;
-import com.dimovski.sportko.rest.SendMessageResponse;
-import com.dimovski.sportko.utils.*;
+import com.dimovski.sportko.utils.DateTimeUtils;
+import com.dimovski.sportko.utils.FirebaseUtils;
+import com.dimovski.sportko.utils.LocationUtils;
+import com.dimovski.sportko.utils.PhotoUtils;
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -45,26 +44,13 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.RequestBody;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONException;
-import org.json.JSONObject;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
@@ -240,6 +226,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                         int res = repository.deleteEvent(event);
                         if (res!=0) {
                             FirebaseUtils.sendFCM(event, Constants.DELETED);
+                            FirebaseUtils.subscribeToTopic(String.format("%s-creator", event.getId()),false);
                             navigateUpTo(new Intent(AddEventActivity.this, ListActivity.class));
                         }
                     }

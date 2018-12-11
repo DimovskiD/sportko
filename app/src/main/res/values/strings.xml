@@ -78,5 +78,9 @@
     <string name="event_cancelled">The %s event you are attending has been cancelled.</string>
     <string name="event_edited_desc">The %s event you are attending has been edited. Take a look!</string>
     <string name="search">Search</string>
+    <string name="new_attendee">A new user is attending your event %s</string>
+    <string name="new_event_attendee">New Attendee</string>
+    <string name="attendee_cancelled">A user has cancelled his/her participation in your event %s</string>
+    <string name="atendee_cancelled_attendance">New cancellation</string>
 
 </resources>

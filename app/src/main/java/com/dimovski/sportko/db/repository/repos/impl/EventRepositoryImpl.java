@@ -8,6 +8,7 @@ import com.dimovski.sportko.db.repository.repos.firestore.FirebaseEventRepositor
 import com.dimovski.sportko.db.repository.repos.local.LocalEventRepositoryImpl;
 import com.dimovski.sportko.internal.FirebaseTopic;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
+import com.dimovski.sportko.utils.FirebaseUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +51,7 @@ public class EventRepositoryImpl implements EventRepository {
         if (checkInternetConnection(getContext())) {
             String id = firebaseEventRepository.insertEvent(entity);
             entity.setId(id);
+            FirebaseUtils.subscribeToTopic(String.format("%s-creator", entity.getId()),true);            //subscribe user to topic in order to listen for changes in attendance
             return localEventRepository.insert(entity);
         } else {
             EventBus.getDefault().post(new NoInternetConnectionEvent(getContext().getResources().getString(R.string.cant_insert_offline)));

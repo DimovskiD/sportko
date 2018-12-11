@@ -10,6 +10,7 @@ import com.dimovski.sportko.rest.ApiInterface;
 import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.rest.SendMessageResponse;
 import com.dimovski.sportko.service.GetFirebaseAccessToken;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,40 +32,75 @@ public class FirebaseUtils {
         try {
             String token= "Bearer " + getToken.execute().get();
             JSONObject message = new JSONObject();
-            message.put("condition", "\'" +event.getId() +"\'"+ " in topics");
             JSONObject notification = new JSONObject();
-            if (action.equals(Constants.EDITED))   {
-                notification.put("body", String.format(context.getString(R.string.event_edited_desc), event.getTitle()));
-                notification.put("title", context.getString(R.string.event_edited));
+            switch (action) {
+                case Constants.EDITED:
+                    message.put("condition", "\'" +event.getId() +"\'"+ " in topics");
+                    notification.put("body", String.format(context.getString(R.string.event_edited_desc), event.getTitle()));
+                    notification.put("title", context.getString(R.string.event_edited));
+                    break;
+                case Constants.DELETED:
+                    message.put("condition", "\'" +event.getId() +"\'"+ " in topics");
+                    notification.put("body", String.format(context.getString(R.string.event_cancelled), event.getTitle()));
+                    notification.put("title", context.getString(R.string.event_deleted));
+                    break;
+                case Constants.NEW_ATTENDEE:
+                    message.put("condition", "\'" +event.getId()+"-creator" +"\'"+ " in topics");
+                    notification.put("body", String.format(context.getString(R.string.new_attendee), event.getTitle()));
+                    notification.put("title", context.getString(R.string.new_event_attendee));
+                    break;
+                case Constants.ATENDEE_CANCELLED:
+                    message.put("condition", "\'" +event.getId()+"-creator" +"\'"+ " in topics");
+                    notification.put("body", String.format(context.getString(R.string.attendee_cancelled), event.getTitle()));
+                    notification.put("title", context.getString(R.string.atendee_cancelled_attendance));
+                    break;
+
             }
 
-            else if (action.equals(Constants.DELETED)) {
-                notification.put("body", String.format(context.getString(R.string.event_cancelled), event.getTitle()));
-                notification.put("title", context.getString(R.string.event_deleted));
-            }
             message.put("notification",notification);
             JSONObject body = new JSONObject();
             body.put("message",message);
 
             JSONObject android = new JSONObject();
             JSONObject notificationAndroid = new JSONObject();
-            if (action.equals(Constants.EDITED))   {
-                notificationAndroid.put("body", String.format(context.getString(R.string.event_edited_desc), event.getTitle()));
-                notificationAndroid.put("title", context.getString(R.string.event_edited));
-                JSONObject data = new JSONObject();
-                String eventJson = new Gson().toJson(event);
-                data.put(Constants.EVENT,eventJson);
-                message.put("data",data);
+
+            switch (action) {
+                case Constants.EDITED:
+                    notificationAndroid.put("body", String.format(context.getString(R.string.event_edited_desc), event.getTitle()));
+                    notificationAndroid.put("title", context.getString(R.string.event_edited));
+                    JSONObject data = new JSONObject();
+                    String eventJson = new Gson().toJson(event);
+                    data.put(Constants.EVENT,eventJson);
+                    message.put("data",data);
+                    break;
+                case Constants.DELETED:
+                    notificationAndroid.put("body", String.format(context.getString(R.string.new_attendee), event.getTitle()));
+                    notificationAndroid.put("title", context.getString(R.string.event_deleted));
+                    break;
+                case Constants.NEW_ATTENDEE:
+                    notificationAndroid.put("body", String.format(context.getString(R.string.new_attendee), event.getTitle()));
+                    notificationAndroid.put("title", context.getString(R.string.new_event_attendee));
+                    JSONObject dataEvent = new JSONObject();
+                    String eventJson1 = new Gson().toJson(event);
+                    dataEvent.put(Constants.EVENT,eventJson1);
+                    message.put("data",dataEvent);
+                    break;
+                case Constants.ATENDEE_CANCELLED:
+                    notificationAndroid.put("body", String.format(context.getString(R.string.attendee_cancelled), event.getTitle()));
+                    notificationAndroid.put("title", context.getString(R.string.atendee_cancelled_attendance));
+                    JSONObject dataEventAttendeeCancelled = new JSONObject();
+                    String eventJsonAttendeeCancelled = new Gson().toJson(event);
+                    dataEventAttendeeCancelled.put(Constants.EVENT,eventJsonAttendeeCancelled);
+                    message.put("data",dataEventAttendeeCancelled);
+                    break;
+
             }
 
-            else if (action.equals(Constants.DELETED)) {
-                notificationAndroid.put("body", String.format(context.getString(R.string.event_cancelled), event.getTitle()));
-                notificationAndroid.put("title", context.getString(R.string.event_deleted));
-            }
             notificationAndroid.put("sound","default");
             notificationAndroid.put("click_action","DETAIL_ACTIVITY");
-            android.put("notification",notificationAndroid);
+            notificationAndroid.put("channel_id","FIREBASE_FCM");
 
+            android.put("notification",notificationAndroid);
 
             message.put("android",android);
 
@@ -87,6 +123,13 @@ public class FirebaseUtils {
             e.printStackTrace();
         }
     }
+
+    public static void subscribeToTopic(String topic,Boolean shouldSubscribe) {
+        if (shouldSubscribe)
+            FirebaseMessaging.getInstance().subscribeToTopic(topic);
+        else  FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
+    }
+
 
 
 }

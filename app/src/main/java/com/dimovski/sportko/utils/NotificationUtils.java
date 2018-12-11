@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import com.dimovski.sportko.BaseApp;
 import com.dimovski.sportko.R;
 
+import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.ui.EventDetailActivity;
 import com.dimovski.sportko.ui.ListActivity;
@@ -35,11 +36,17 @@ public class NotificationUtils {
             else if (title.equals(context.getString(R.string.event_deleted))) {
                 channelName = "DELETED_EVENT";
                 channelDesc = "Channel for receiving notifications about deleted events";
+            } else if (title.equals(Constants.ATENDEE_CANCELLED)) {
+                channelName = "ATTENDEE_CANCELLED";
+                channelDesc = "Channel for receiving notifications about cancellation of attendance to an event";
+            } else if (title.equals(Constants.NEW_ATTENDEE)) {
+                channelName = "NEW_ATTENDEE";
+                channelDesc = "Channel for receiving notifications about new attendees to an event";
             }
 
             if (Build.VERSION.SDK_INT >= 26) {
                 NotificationChannel notificationChannel = new NotificationChannel(channelName, channelName,
-                        NotificationManager.IMPORTANCE_HIGH);
+                        NotificationManager.IMPORTANCE_DEFAULT);
                 notificationChannel.setDescription(channelDesc);
                 notificationManager.createNotificationChannel(notificationChannel);
             }
@@ -50,9 +57,10 @@ public class NotificationUtils {
                     .setAutoCancel(true)
                     .setSound(defaultSoundUri)
                     .setSmallIcon(R.mipmap.ic_launcher)
+                    .setChannelId(channelName)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(desc))
-                    .setPriority(android.app.Notification.PRIORITY_MAX)
+                    .setPriority(Notification.PRIORITY_DEFAULT)
                     .setDefaults(android.app.Notification.DEFAULT_ALL)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
 
