@@ -53,7 +53,7 @@ public class FirebaseUtils {
                 notificationAndroid.put("title", context.getString(R.string.event_edited));
                 JSONObject data = new JSONObject();
                 String eventJson = new Gson().toJson(event);
-                data.put("event",eventJson);
+                data.put(Constants.EVENT,eventJson);
                 message.put("data",data);
             }
 

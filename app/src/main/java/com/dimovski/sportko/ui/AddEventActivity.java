@@ -439,6 +439,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                         mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
+                                sharedPreferences.edit().putBoolean(Constants.LOCATION,true).apply();
                                 startAutoCompleteFragment(location);
                             }
                         });

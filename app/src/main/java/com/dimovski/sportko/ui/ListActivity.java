@@ -4,7 +4,10 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
@@ -19,10 +22,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,7 +45,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-
 public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
 
     Unbinder unbinder;
@@ -48,6 +53,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     Observer<List<Event>> eventObserver;
     SharedPreferences sharedPreferences;
     String currentUser;
+    String currentQuery="";
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -65,8 +71,11 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     SwipeRefreshLayout refreshLayout;
     @BindView(R.id.emptyRv)
     TextView emptyRv;
+    @BindView(R.id.searchView)
+    SearchView searchView;
 
     private DrawerItem selectedItem = DrawerItem.LIST_EVENTS;
+    private List<Event> eventList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +97,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         tv.setText(String.format("%s %s", getString(R.string.hello), currentUser));
 
         viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
-
+        searchView.setLayoutParams(new Toolbar.LayoutParams(Gravity.END));
+        searchView.setPadding(0, 2, 0, 2);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         progressBar.setVisibility(View.VISIBLE);
 
@@ -125,7 +135,33 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         super.onResume();
         setObserver();
 
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(Constants.SEARCH_QUERY,currentQuery);
+        outState.putSerializable(Constants.SELECTED_ITEMS,selectedItem);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+         selectedItem = (DrawerItem) savedInstanceState.getSerializable(Constants.SELECTED_ITEMS);
+         if (selectedItem == DrawerItem.LIST_EVENTS) {
+             navigationView.getMenu().getItem(0).setChecked(true);
+             navigationView.getMenu().getItem(1).setChecked(false);
+         }
+        else if (selectedItem == DrawerItem.MY_EVENTS) {
+             navigationView.getMenu().getItem(1).setChecked(true);
+             navigationView.getMenu().getItem(0).setChecked(false);
+         }
+        setObserver();
+        if (currentQuery!=null && !currentQuery.equals("")){
+            searchView.setQuery(currentQuery,false);
+        }
     }
 
     @Override
@@ -157,10 +193,14 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 selectedItem = DrawerItem.LIST_EVENTS;
                 updateObservers();
                 toolbar.setTitle(R.string.upcoming_events);
+                currentQuery = "";
+                searchView.setIconified(true);
                 break;
             case R.id.myEvents:
                 selectedItem = DrawerItem.MY_EVENTS;
                 toolbar.setTitle(R.string.my_events);
+                currentQuery = "";
+                searchView.setIconified(true);
                 updateObservers();
                 break;
             case R.id.settings:
@@ -169,6 +209,15 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         }
         drawerLayout.closeDrawers();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!searchView.isIconified()) {
+            searchView.setIconified(true);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void checkItem(MenuItem menuItem) {
@@ -227,10 +276,26 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         EventBus.getDefault().postSticky(event);
     }
 
-
     private void setListeners() {
         fab.setOnClickListener(this);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (adapter!=null && adapter.getFilter()!=null)
+                    adapter.getFilter().filter(query);
+                currentQuery = query;
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (adapter!=null && adapter.getFilter()!=null)
+                    adapter.getFilter().filter(newText);
+                currentQuery = newText;
+
+                return false;
+            }
+        });
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -261,6 +326,12 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
                 else {
                     adapter = new EventAdapter(events,ListActivity.this);
                     recyclerView.setAdapter(adapter);
+
+                }
+                eventList = events;
+                if (currentQuery!=null && !currentQuery.equals("")) {
+                    searchView.setQuery(currentQuery, false);
+                    adapter.getFilter().filter(currentQuery);
                 }
                 if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
             }

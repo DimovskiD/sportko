@@ -31,7 +31,8 @@ public class FirebaseEventRepository {
         return repository;
     }
 
-    private FirebaseEventRepository() {}
+    private FirebaseEventRepository() {
+    }
 
 
     public void updateEvent(Event event) {

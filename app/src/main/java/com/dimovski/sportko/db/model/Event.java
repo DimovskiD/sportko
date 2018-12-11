@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import com.dimovski.sportko.db.converter.Converters;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -91,6 +92,7 @@ public class Event {
     public void setCreated(Date created) {
         this.created = created;
     }
+
 
     public Date getScheduled() {
         return scheduled;

@@ -62,6 +62,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         switchCompat.setChecked(sharedPreferences.getBoolean(Constants.LOCATION,false));
 
+        switchCompat.setChecked(sharedPreferences.getBoolean(Constants.LOCATION,false));
+
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

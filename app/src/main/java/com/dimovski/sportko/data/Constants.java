@@ -16,6 +16,11 @@ public class Constants {
     public static final String LOCATION = "USE_LOCATION";
     public static final String DELETED = "DELETED";
     public static final String EDITED = "EDITED";
+    public static final String EVENT = "event";
+    public static final int SMS_PERMISSIONS_CODE = 345;
+    public static final int SMS_PERMISSIONS_CODE_LISTENER = 222;
+    public static final String SELECTED_ITEMS = "SELECTED_EVENTS";
+    public static final String SEARCH_QUERY = "SEARCH_QUERY";
     public static String EVENT_ID = "EVENT_ID";
 
     public static String[] locPermission = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};

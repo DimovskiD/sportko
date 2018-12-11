@@ -78,9 +78,10 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         currentUser = sharedPreferences.getString(Constants.EMAIL,"");
 
 
-        String json = getIntent().getStringExtra("event");
+        String json = getIntent().getStringExtra(Constants.EVENT);
         if (json!= null && !json.equals(""))
             event= new GsonBuilder().create().fromJson(json, Event.class);
+        //TODO replace Date with Timestamp to avoid crash when trying to convert dates from different locales.
     }
 
 

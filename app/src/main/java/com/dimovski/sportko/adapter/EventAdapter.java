@@ -8,9 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
@@ -18,19 +16,22 @@ import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.ui.AddEventActivity;
 import com.dimovski.sportko.utils.DateTimeUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class EventAdapter extends
-        RecyclerView.Adapter<EventAdapter.ViewHolder> {
+        RecyclerView.Adapter<EventAdapter.ViewHolder> implements Filterable {
 
     private List<Event> events;
+    private List<Event> filteredEvents;
     private ViewGroup parent;
     private ItemClickHandler handler;
 
     public EventAdapter(List<Event> eventList, ItemClickHandler handler){
         this.handler=handler;
-        events = eventList;
+        filteredEvents = eventList;
+        this.events = eventList;
     }
 
     // Usually involves inflating a layout from XML and returning the holder
@@ -51,7 +52,7 @@ public class EventAdapter extends
     @Override
     public void onBindViewHolder(@NonNull EventAdapter.ViewHolder viewHolder, int position) {
 
-        final Event e = events.get(position);
+        final Event e = filteredEvents.get(position);
         viewHolder.title.setText(e.getTitle());
         viewHolder.date.setText(DateTimeUtils.formatDate(e.getScheduled(),parent.getContext()));
         viewHolder.time.setText(DateTimeUtils.formatTime(e.getScheduled(),parent.getContext()));
@@ -82,14 +83,51 @@ public class EventAdapter extends
     // Returns the total count of items in the list
     @Override
     public int getItemCount() {
-        return events.size();
+        return filteredEvents.size();
     }
 
     public void setEvents(List<Event> events) {
+        this.filteredEvents = events;
         this.events = events;
         notifyDataSetChanged();
     }
 
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                if (constraint.length() == 0) {
+
+                    filteredEvents = events;
+                } else {
+
+                    ArrayList<Event> newEvents = new ArrayList<>();
+                    final String filterPattern = constraint.toString().toLowerCase().trim();
+                    for (Event event : events) {
+                        if (event.getTitle().toLowerCase().contains(filterPattern) || event.getTitle().contains(filterPattern) || event.getLocationName().toLowerCase().trim().contains(filterPattern)) {
+
+                            newEvents.add(event);
+                        }
+                    }
+                    filteredEvents = newEvents;
+
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredEvents;
+
+
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                filteredEvents = (ArrayList<Event>) results.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
