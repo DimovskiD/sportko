@@ -2,6 +2,7 @@ package com.dimovski.sportko.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,6 +29,7 @@ import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.Repository;
+import com.dimovski.sportko.internal.DynamicLinkListner;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.DateTimeUtils;
@@ -45,6 +48,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -54,9 +58,11 @@ import java.util.Date;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 
-public class AddEventActivity extends BaseActivity implements View.OnClickListener {
+public class AddEventActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListner {
 
 
     Unbinder unbinder;
@@ -81,7 +87,10 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     TextInputEditText maxAtendees;
     @BindView(R.id.input_auto_complete)
     TextInputEditText autoCompletePlaces;
-
+    @BindView(R.id.shareButton)
+    FloatingActionButton share;
+    @BindView(R.id.fab_container)
+    LinearLayout fab_container;
 
     private Date scheduled;
     private int photoResourceId;
@@ -92,6 +101,8 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     private double lat;
     private double lon;
     private SingleDateAndTimePickerDialog dateTimeDialog;
+    ProgressDialog progressDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +124,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         maxAtendees.setOnClickListener(this);
         autoCompletePlaces.setOnClickListener(this);
         deleteEvent.setOnClickListener(this);
+        share.setOnClickListener(this);
     }
 
 
@@ -136,6 +148,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void initUi() {
+        if (mode == Mode.UPDATE)
+            fab_container.setVisibility(VISIBLE);
+        else fab_container.setVisibility(GONE);
         title.setText(event.getTitle());
         description.setText(event.getDescription());
         categorySpinner.setSelection(adapter.getPosition(event.getTypeOfEvent()));
@@ -146,7 +161,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         scheduledTime.setText(String.format("%s %s", DateTimeUtils.formatDate(event.getScheduled(), this), DateTimeUtils.formatTime(event.getScheduled(), this)));
         maxAtendees.setText(String.format("%d", event.getMaxAttendees()));
         deleteEvent.setText(R.string.delete_event);
-        deleteEvent.setVisibility(View.VISIBLE);
+        deleteEvent.setVisibility(VISIBLE);
 //        deleteEvent.setClickable(true);
         createEvent.setText(R.string.edit_event);
     }
@@ -212,6 +227,10 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                 break;
             case R.id.deleteEvent:
                 deleteButtonClicked();
+                break;
+            case R.id.shareButton:
+                FirebaseUtils.createDynamicLink(event.getId(), this);
+                showProgressDialog();
                 break;
         }
     }
@@ -437,5 +456,24 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
                 }
             }
         }
+    }
+
+    private void showProgressDialog() {
+        if (progressDialog==null)
+            progressDialog = new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(getString(R.string.please_wait));
+        progressDialog.show();
+    }
+
+    @Override
+    public void shortDynamicLinkCreated(ShortDynamicLink shortDynamicLink) {
+        if (progressDialog!=null && progressDialog.isShowing()) progressDialog.hide();
+        Intent sendIntent = new Intent();
+        String msg = String.format("%s %s", getString(R.string.check_out_event), shortDynamicLink.getShortLink());
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, msg);
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent,getString(R.string.share_event)));
     }
 }

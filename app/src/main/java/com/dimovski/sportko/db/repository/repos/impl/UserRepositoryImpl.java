@@ -74,4 +74,9 @@ public class UserRepositoryImpl implements UserRepository {
             return new MutableLiveData<>();
         }
     }
+
+    @Override
+    public String getUsernameForEmail(String email) {
+        return  firebaseUserRepository.getUsernameForEmail(email);
+    }
 }

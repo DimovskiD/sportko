@@ -86,4 +86,6 @@ public class Repository {
     public void deleteUser(User user) {
         userRepository.delete(user);
     }
+
+    public String getUsernameForEmail(String email) {return userRepository.getUsernameForEmail(email);}
 }

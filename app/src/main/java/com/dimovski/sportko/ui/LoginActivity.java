@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 import butterknife.BindView;
@@ -33,11 +34,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @BindView(R.id.input_password)
     TextInputEditText passwordTV;
 
+    private String eventId;
     private FirebaseAuth authentication;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
         authentication = FirebaseAuth.getInstance();
@@ -49,6 +53,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onStart() {
         super.onStart();
+        if (getIntent().getExtras()!=null) {
+            eventId = getIntent().getStringExtra(Constants.EVENT_ID);
+        }
         FirebaseUser currentUser = authentication.getCurrentUser();
         if (currentUser!=null)
             startListActivity();
@@ -94,7 +101,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 FirebaseUser user = authentication.getCurrentUser();
                                 SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
                                 sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
-                                startListActivity();
+                                if (eventId==null || eventId.equals(""))
+                                    startListActivity();
+                                else startDetailActivity(eventId);
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithEmail:failure", task.getException());

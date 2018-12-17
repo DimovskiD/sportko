@@ -1,11 +1,9 @@
 package com.dimovski.sportko.service;
 
-import android.util.Log;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.utils.NotificationUtils;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.Gson;
 
 import java.util.Map;
 

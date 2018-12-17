@@ -6,7 +6,6 @@ import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.repository.repos.EventRepository;
 import com.dimovski.sportko.db.repository.repos.firestore.FirebaseEventRepository;
 import com.dimovski.sportko.db.repository.repos.local.LocalEventRepositoryImpl;
-import com.dimovski.sportko.internal.FirebaseTopic;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.FirebaseUtils;
 import org.greenrobot.eventbus.EventBus;

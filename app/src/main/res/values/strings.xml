@@ -82,5 +82,12 @@
     <string name="new_event_attendee">New Attendee</string>
     <string name="attendee_cancelled">A user has cancelled his/her participation in your event %s</string>
     <string name="atendee_cancelled_attendance">New cancellation</string>
+    <string name="who_s_going">Who\'s going?</string>
+    <string name="profile_photo">Profile photo</string>
+    <string name="share_event">Share event</string>
+    <string name="check_out_event">Hey, check out this event:</string>
+    <string name="share">Share</string>
+    <string name="please_wait">Please wait...</string>
+
 
 </resources>

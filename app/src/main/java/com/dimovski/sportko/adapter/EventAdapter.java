@@ -1,7 +1,5 @@
 package com.dimovski.sportko.adapter;
 
-import android.content.Intent;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -11,9 +9,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
-import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
-import com.dimovski.sportko.ui.AddEventActivity;
 import com.dimovski.sportko.utils.DateTimeUtils;
 
 import java.util.ArrayList;

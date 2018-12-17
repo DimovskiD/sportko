@@ -11,8 +11,7 @@ public class BaseActivity  extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
+
     }
 
     protected void startListActivity() {
@@ -29,6 +28,20 @@ public class BaseActivity  extends AppCompatActivity {
 
     protected void startLoginActivity() {
         Intent startActivity = new Intent(this,LoginActivity.class);
+        startActivity(startActivity);
+        this.finish();
+    }
+
+    protected void startLoginActivity(String eventId) {
+        Intent startActivity = new Intent(this,LoginActivity.class);
+        startActivity.putExtra(Constants.EVENT_ID,eventId);
+        startActivity(startActivity);
+        this.finish();
+    }
+
+    protected void startDetailActivity(String eventId) {
+        Intent startActivity = new Intent(this,EventDetailActivity.class);
+        startActivity.putExtra(Constants.EVENT_ID,eventId);
         startActivity(startActivity);
         this.finish();
     }

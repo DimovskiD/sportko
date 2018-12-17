@@ -1,15 +1,24 @@
 package com.dimovski.sportko.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import com.dimovski.sportko.BaseApp;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.internal.DynamicLinkListner;
 import com.dimovski.sportko.rest.ApiInterface;
 import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.rest.SendMessageResponse;
 import com.dimovski.sportko.service.GetFirebaseAccessToken;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import org.json.JSONException;
@@ -49,7 +58,7 @@ public class FirebaseUtils {
                     notification.put("body", String.format(context.getString(R.string.new_attendee), event.getTitle()));
                     notification.put("title", context.getString(R.string.new_event_attendee));
                     break;
-                case Constants.ATENDEE_CANCELLED:
+                case Constants.ATTENDEE_CANCELLED:
                     message.put("condition", "\'" +event.getId()+"-creator" +"\'"+ " in topics");
                     notification.put("body", String.format(context.getString(R.string.attendee_cancelled), event.getTitle()));
                     notification.put("title", context.getString(R.string.atendee_cancelled_attendance));
@@ -85,7 +94,7 @@ public class FirebaseUtils {
                     dataEvent.put(Constants.EVENT,eventJson1);
                     message.put("data",dataEvent);
                     break;
-                case Constants.ATENDEE_CANCELLED:
+                case Constants.ATTENDEE_CANCELLED:
                     notificationAndroid.put("body", String.format(context.getString(R.string.attendee_cancelled), event.getTitle()));
                     notificationAndroid.put("title", context.getString(R.string.atendee_cancelled_attendance));
                     JSONObject dataEventAttendeeCancelled = new JSONObject();
@@ -130,6 +139,21 @@ public class FirebaseUtils {
         else  FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
     }
 
+    public static void createDynamicLink(String eventId, final DynamicLinkListner listner) {
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse("https://sportko573477588.wordpress.com/event?id="+eventId))
+                .setDomainUriPrefix("https://sportko.page.link")
+                // Open links with this app on Android
+                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder("com.dimovski.sportko").build())
+                .buildShortDynamicLink(ShortDynamicLink.Suffix.SHORT).addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
+                    @Override
+                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
+                        listner.shortDynamicLinkCreated(shortDynamicLink);
+                    }
+                });
+
+
+    }
 
 
 }

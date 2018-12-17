@@ -66,6 +66,10 @@ public class FirebaseUserRepository {
         });
     }
 
+    public String getUsernameForEmail(String email) {
+        return ""; //TODO
+    }
+
     public LiveData<List<User>> getAllUsers() {
         final MutableLiveData<List<User>> users;
 

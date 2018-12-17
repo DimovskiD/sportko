@@ -7,6 +7,7 @@ import android.support.design.widget.TextInputEditText;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 import butterknife.BindView;
@@ -46,6 +47,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
         setContentView(R.layout.activity_register);
         unbinder = ButterKnife.bind(this);
         authentication = FirebaseAuth.getInstance();

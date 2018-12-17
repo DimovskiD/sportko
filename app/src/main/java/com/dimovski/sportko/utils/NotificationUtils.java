@@ -15,9 +15,7 @@ import com.dimovski.sportko.BaseApp;
 import com.dimovski.sportko.R;
 
 import com.dimovski.sportko.data.Constants;
-import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.ui.EventDetailActivity;
-import com.dimovski.sportko.ui.ListActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
 
@@ -36,7 +34,7 @@ public class NotificationUtils {
             else if (title.equals(context.getString(R.string.event_deleted))) {
                 channelName = "DELETED_EVENT";
                 channelDesc = "Channel for receiving notifications about deleted events";
-            } else if (title.equals(Constants.ATENDEE_CANCELLED)) {
+            } else if (title.equals(Constants.ATTENDEE_CANCELLED)) {
                 channelName = "ATTENDEE_CANCELLED";
                 channelDesc = "Channel for receiving notifications about cancellation of attendance to an event";
             } else if (title.equals(Constants.NEW_ATTENDEE)) {

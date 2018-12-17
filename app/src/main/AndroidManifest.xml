@@ -32,10 +32,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.EventDetailActivity">
+        <activity android:name=".ui.EventDetailActivity"
+        android:parentActivityName=".ui.ListActivity">
             <intent-filter>
                 <action android:name="DETAIL_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="sportko573477588.wordpress.com"
+                      android:scheme="https"/>
+
             </intent-filter>
         </activity>
         <activity android:name=".ui.SettingsActivity"
