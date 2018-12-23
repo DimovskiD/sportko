@@ -19,19 +19,18 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.DynamicLinkListner;
+import com.dimovski.sportko.internal.DynamicLinkListener;
 import com.dimovski.sportko.ui.dialog.AttendeesDialog;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.utils.FirebaseUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
@@ -41,7 +40,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class EventDetailActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListner {
+public class EventDetailActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListener {
 
     Unbinder unbinder;
     Repository repository = Repository.getInstance();
@@ -119,7 +118,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         if (pendingDynamicLinkData != null) {
                             deepLink = pendingDynamicLinkData.getLink();
                             eventId = deepLink.getQueryParameter("id");
-                            if (FirebaseAuth.getInstance().getCurrentUser()!=null)
+                            if (FirebaseAuthentication.getInstance().getCurrentUser()!=null)
                                 setUpObserver();
                             else {
                                 startLoginActivity(eventId);

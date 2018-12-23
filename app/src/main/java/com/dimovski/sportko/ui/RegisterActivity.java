@@ -14,20 +14,18 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.auth.Authentication;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
+import com.dimovski.sportko.auth.OnAuthCompleteListener;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.Repository;
 import com.dimovski.sportko.utils.StringUtils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 
-public class RegisterActivity extends BaseActivity implements View.OnClickListener {
+public class RegisterActivity extends BaseActivity implements View.OnClickListener, OnAuthCompleteListener {
 
-    private FirebaseAuth authentication;
+    private Authentication authentication;
     private Repository repo = Repository.getInstance();
 
     private Unbinder unbinder;
@@ -51,7 +49,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
         setContentView(R.layout.activity_register);
         unbinder = ButterKnife.bind(this);
-        authentication = FirebaseAuth.getInstance();
+        authentication = FirebaseAuthentication.getInstance();
         signup.setOnClickListener(this);
         login.setOnClickListener(this);
 
@@ -86,36 +84,34 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             error=true;
         }
 
-        if(!error)
-            authentication.createUserWithEmailAndPassword(email.getText().toString(),password.getText().toString()).
-            addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d("CREATE_ACC", "createUserWithEmail:success");
-                        FirebaseUser user = authentication.getCurrentUser();
-                        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString(Constants.EMAIL, user.getEmail());
-                        editor.putString(Constants.USER,username.getText().toString());
-                        editor.apply();
-                        repo.insertUser(new User(user.getEmail(),username.getText().toString()));
-                        startListActivity();
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w("CREATE_ACC", "createUserWithEmail:failure", task.getException());
-                        Toast.makeText(RegisterActivity.this, task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
+        if(!error) {
+            authentication.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString(), this);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbinder.unbind();
+    }
+
+    @Override
+    public void onComplete(boolean result) {
+        if (result) {
+            // Sign in success, update UI with the signed-in user's information
+            Log.d("CREATE_ACC", "createUserWithEmail:success");
+            User user = authentication.getCurrentUser();
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(Constants.EMAIL, user.getEmail());
+            editor.putString(Constants.USER,username.getText().toString());
+            editor.apply();
+            repo.insertUser(new User(user.getEmail(),username.getText().toString()));
+            startListActivity();
+        } else {
+            // If sign in fails, display a message to the user.
+            Toast.makeText(RegisterActivity.this, R.string.failed_create_user,
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -15,7 +15,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,18 +29,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
-import com.dimovski.sportko.adapter.EventAdapter;
+import com.dimovski.sportko.adapter.event.EventAdapter;
 import com.dimovski.sportko.adapter.ItemClickHandler;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.auth.Authentication;
 import com.dimovski.sportko.internal.DrawerItem;
 import com.dimovski.sportko.utils.NetworkUtils;
 import com.dimovski.sportko.viewmodel.EventViewModel;
-import com.google.firebase.auth.FirebaseAuth;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
+public class ListActivity extends BaseActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
 
     Unbinder unbinder;
     EventViewModel viewModel;
@@ -50,6 +51,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     SharedPreferences sharedPreferences;
     String currentUser;
     String currentQuery="";
+    Authentication auth;
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -102,6 +104,8 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
             showSnackbar();
         }
         setListeners();
+
+        auth = FirebaseAuthentication.getInstance();
     }
 
     private void updateObservers() {
@@ -181,9 +185,9 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         checkItem(menuItem);
         switch (menuItem.getItemId()) {
             case R.id.logOut:
-                FirebaseAuth.getInstance().signOut();
+                auth.signOut();
                 clearPreferences();
-                navigateToLoginActivity();
+                startLoginActivity();
                 break;
             case R.id.List:
                 selectedItem = DrawerItem.LIST_EVENTS;
@@ -238,10 +242,6 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         editor.apply();
     }
 
-    private void startSettingsActivity() {
-        Intent i = new Intent(this,SettingsActivity.class);
-        startActivity(i);
-    }
 
     @Override
     public void onClick(View v) {
@@ -252,19 +252,9 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         }
     }
 
-    private void navigateToLoginActivity() {
-        Intent i = new Intent(this,LoginActivity.class);
-        startActivity(i);
-        this.finish();
-    }
-
-    private void startCreateNewActivity() {
-        Intent i = new Intent(this,AddEventActivity.class);
-        startActivity(i);
-    }
 
     @Override
-    public void itemClicked(Event event) {
+    public void eventClicked(Event event) {
         Intent i;
         if (event.getCreatedBy().equals(currentUser)) i = new Intent(this, AddEventActivity.class);
         else i = new Intent(this, EventDetailActivity.class);

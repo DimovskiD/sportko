@@ -28,8 +28,10 @@ import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.db.model.EventBuilder;
+import com.dimovski.sportko.db.model.LocationDetails;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.DynamicLinkListner;
+import com.dimovski.sportko.internal.DynamicLinkListener;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.DateTimeUtils;
@@ -62,7 +64,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 
-public class AddEventActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListner {
+public class AddEventActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListener {
 
 
     Unbinder unbinder;
@@ -351,26 +353,24 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         Resources resources = getResources();
         Uri uri = PhotoUtils.getUriForId(resources, photoResourceId);
         Event e;
+        String city = LocationUtils.getCityForLocation(this,lat,lon);
+        EventBuilder builder = new EventBuilder()
+                .id(event != null ? event.getId() : "")
+                .title(title.getText().toString())
+                .description(description.getText().toString())
+                .created(Calendar.getInstance().getTime())
+                .scheduled(scheduled != null? scheduled : event.getScheduled())
+                .location(new LocationDetails(lat,lon,autoCompletePlaces.getText().toString(),city))
+                .imgSrc(uri.toString())
+                .maxAttendees(Integer.parseInt(maxAtendees.getText().toString()))
+                .typeOfEvent(categorySpinner.getSelectedItem().toString())
+                .createdBy(createdBy);
+        e = builder.createEvent();
+
         if (mode == Mode.CREATE) {
-            String city = LocationUtils.getCityForLocation(this,lat,lon);
-            e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
-                    lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
-                    categorySpinner.getSelectedItem().toString(), createdBy, city);
             res = repository.insertEvent(e);
         } else {
-            event.setTitle(title.getText().toString());
-            event.setDescription(description.getText().toString());
-            if (scheduled != null)
-                event.setScheduled(scheduled);
-            event.setTypeOfEvent(categorySpinner.getSelectedItem().toString());
-            event.setImgSrc(uri.toString());
-            event.setLat(lat);
-            event.setLon(lon);
-            event.setLocationName(autoCompletePlaces.getText().toString());
-            String maxAtt = maxAtendees.getText().toString();
-            Log.i("MAX_ATT", maxAtt);
-            event.setMaxAttendees(Integer.parseInt(maxAtt));
-            res = repository.updateEvent(event);
+            res = repository.updateEvent(e);
         }
         return res;
 

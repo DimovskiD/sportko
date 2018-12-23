@@ -7,11 +7,11 @@ import android.content.Context;
 import android.os.Build;
 
 public class BaseApp extends Application {
-    private static Context context;
+    private static BaseApp app;
 
     public void onCreate(){
         super.onCreate();
-        BaseApp.context = getApplicationContext();
+        app = this;
         initDefaultChannelForFCM();
     }
 
@@ -20,13 +20,13 @@ public class BaseApp extends Application {
             NotificationChannel notificationChannel = new NotificationChannel("FIREBASE_FCM", "Firebase FCM channel",
                     NotificationManager.IMPORTANCE_HIGH);
             notificationChannel.setDescription("Channel for Firecloud Messaging notifications about events");
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager!=null)
                 notificationManager.createNotificationChannel(notificationChannel);
         }
     }
 
     public static Context getContext() {
-        return BaseApp.context;
+        return app.getApplicationContext();
     }
 }
