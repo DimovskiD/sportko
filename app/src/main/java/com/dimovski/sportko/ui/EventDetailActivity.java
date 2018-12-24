@@ -71,6 +71,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     TextView whosGoing;
     @BindView(R.id.share)
     FloatingActionButton share;
+    @BindView(R.id.get_directions)
+    TextView getDirections;
 
     Event event;
     SharedPreferences sharedPreferences;
@@ -89,6 +91,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         attendEvent.setOnClickListener(this);
         attendingEvent.setOnClickListener(this);
         share.setOnClickListener(this);
+        getDirections.setOnClickListener(this);
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF,MODE_PRIVATE);
         currentUser = sharedPreferences.getString(Constants.EMAIL,"");
 
@@ -297,6 +300,11 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             case R.id.share:
                 FirebaseUtils.createDynamicLink(eventId, this);
                 showProgressDialog();
+                break;
+            case R.id.get_directions:
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps/dir/?api=1&destination="+event.getLon()+","+event.getLat()));
+                startActivity(intent);
                 break;
         }
     }

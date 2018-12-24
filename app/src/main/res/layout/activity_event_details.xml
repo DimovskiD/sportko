@@ -84,6 +84,10 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                           android:id="@+id/where"/>
 
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:textColor="@color/colorPrimaryDark"
+                          android:layout_marginStart="5dp"
+                          android:id="@+id/get_directions" android:text="@string/get_directions" />
             </LinearLayout>
 
 
