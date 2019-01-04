@@ -46,4 +46,15 @@ public class BaseActivity  extends AppCompatActivity {
         this.finish();
     }
 
+
+    protected void startSettingsActivity() {
+        Intent i = new Intent(this,SettingsActivity.class);
+        startActivity(i);
+    }
+
+    protected void startCreateNewActivity() {
+        Intent i = new Intent(this,AddEventActivity.class);
+        startActivity(i);
+    }
+
 }

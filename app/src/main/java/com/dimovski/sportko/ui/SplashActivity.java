@@ -2,16 +2,15 @@ package com.dimovski.sportko.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.view.WindowManager;
 import com.dimovski.sportko.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.dimovski.sportko.auth.Authentication;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
+import com.dimovski.sportko.auth.InvalidUserListener;
 
-public class SplashActivity extends BaseActivity {
+public class SplashActivity extends BaseActivity implements InvalidUserListener {
 
-    FirebaseAuth auth = FirebaseAuth.getInstance();
+    Authentication auth = FirebaseAuthentication.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +32,14 @@ public class SplashActivity extends BaseActivity {
         if (auth.getCurrentUser()==null)
             startLoginActivity();
         else {
-            auth.getCurrentUser().reload().addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof FirebaseAuthInvalidUserException) {
-                        startLoginActivity();
-                    }
-                }
-            });
-            startListActivity();
+            auth.reloadCurrentUser(this);
         }
+    }
+
+    @Override
+    public void invalidUser(boolean isInvalid) {
+        if (isInvalid)
+            startLoginActivity();
+        else startListActivity();
     }
 }
