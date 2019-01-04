@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**Single source of truth, provides methods for accessing events and users, based on the chosen implementations*/
 public class Repository {
-
 
     private MutableLiveData<List<Event>> events;
     private MutableLiveData<List<Event>> myEvents;

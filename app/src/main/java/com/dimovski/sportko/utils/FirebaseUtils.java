@@ -1,6 +1,5 @@
 package com.dimovski.sportko.utils;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -8,14 +7,12 @@ import com.dimovski.sportko.BaseApp;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
-import com.dimovski.sportko.internal.DynamicLinkListner;
+import com.dimovski.sportko.internal.DynamicLinkListener;
 import com.dimovski.sportko.rest.ApiInterface;
 import com.dimovski.sportko.rest.Client;
 import com.dimovski.sportko.rest.SendMessageResponse;
 import com.dimovski.sportko.service.GetFirebaseAccessToken;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
@@ -29,10 +26,17 @@ import retrofit2.Response;
 
 import java.util.concurrent.ExecutionException;
 
+/**Utility class for Firebase Operations*/
 public class FirebaseUtils {
 
-    static ApiInterface client;
+    private static ApiInterface client;
 
+    /**Sends Firebase Cloud Message
+     * @param action - action that has been taken. One of @EDITED, DELETED, NEW_ATTENDEE, ATTENDEE_CANCELLED*
+        @param event - the event on which @action was performed
+     Processes the event and the action and builds the Firebase message accordingly.
+     Sends the message when finished
+     */
     public static void sendFCM(Event event, String action) {
 
         Context context = BaseApp.getContext();
@@ -133,13 +137,19 @@ public class FirebaseUtils {
         }
     }
 
+    /**Subscribes/unsubscribes the client to a Firebase Topic (subscribes it to receive notifications about given event)
+     * @param topic - to which topic should the client (app) be subscribed
+     * @param shouldSubscribe - if true, subscribe the client to @topic, else unsubscribe from @topic*/
     public static void subscribeToTopic(String topic,Boolean shouldSubscribe) {
         if (shouldSubscribe)
             FirebaseMessaging.getInstance().subscribeToTopic(topic);
         else  FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
     }
 
-    public static void createDynamicLink(String eventId, final DynamicLinkListner listner) {
+    /**Generates a dynamic link for sharing the event
+     * @param eventId - id of the event that should be shared
+     * @param listner - implementation of @{@link DynamicLinkListener} interface that is informed when the dynamic link is created */
+    public static void createDynamicLink(String eventId, final DynamicLinkListener listner) {
         FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse("https://sportko573477588.wordpress.com/event?id="+eventId))
                 .setDomainUriPrefix("https://sportko.page.link")

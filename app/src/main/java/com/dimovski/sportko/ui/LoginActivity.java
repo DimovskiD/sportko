@@ -1,9 +1,7 @@
 package com.dimovski.sportko.ui;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.util.Log;
 import android.view.View;
@@ -13,16 +11,16 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.auth.Authentication;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
+import com.dimovski.sportko.auth.OnAuthCompleteListener;
 import com.dimovski.sportko.data.Constants;
+import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.utils.StringUtils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.api.Context;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener {
+
+/**Activity that handles the login flow*/
+public class LoginActivity extends BaseActivity implements View.OnClickListener, OnAuthCompleteListener {
 
     private static final String TAG = "START_ACTIVITY";
     @BindView(R.id.login)
@@ -35,7 +33,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     TextInputEditText passwordTV;
 
     private String eventId;
-    private FirebaseAuth authentication;
+    private Authentication authentication;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,10 +42,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //remove status bar
         setContentView(R.layout.activity_start);
         ButterKnife.bind(this);
-        authentication = FirebaseAuth.getInstance();
+        authentication = FirebaseAuthentication.getInstance();
         setOnClickListeners();
     }
-
 
 
     @Override
@@ -56,7 +53,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         if (getIntent().getExtras()!=null) {
             eventId = getIntent().getStringExtra(Constants.EVENT_ID);
         }
-        FirebaseUser currentUser = authentication.getCurrentUser();
+        User currentUser = authentication.getCurrentUser();
         if (currentUser!=null)
             startListActivity();
     }
@@ -79,6 +76,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
+    /**Validates the fields*/
     private void validateLoginDetails() {
         boolean error=false;
         if (emailTV.getText() == null || StringUtils.isEmpty(emailTV.getText().toString())) {
@@ -91,26 +89,25 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
 
         if(!error)
-            authentication.signInWithEmailAndPassword(emailTV.getText().toString(), passwordTV.getText().toString())
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "signInWithEmail:success");
-                                FirebaseUser user = authentication.getCurrentUser();
-                                SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
-                                sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
-                                if (eventId==null || eventId.equals(""))
-                                    startListActivity();
-                                else startDetailActivity(eventId);
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(LoginActivity.this, R.string.auth_failed,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+            authentication.signInWithEmailAndPassword(emailTV.getText().toString(), passwordTV.getText().toString(), this);
+    }
+
+    /**Implementation of @{@link OnAuthCompleteListener}, which is called when @{@link Authentication} has finished authenticating the user details*/
+    @Override
+    public void onComplete(boolean result) {
+        if (result) {
+            // Sign in success, update UI with the signed-in user's information
+            Log.d(TAG, "signInWithEmail:success");
+            User user = authentication.getCurrentUser();
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
+            sharedPreferences.edit().putString(Constants.EMAIL, user.getEmail()).apply();
+            if (eventId==null || eventId.equals(""))
+                startListActivity();
+            else startDetailActivity(eventId);
+        } else {
+            // If sign in fails, display a message to the user.
+            Toast.makeText(LoginActivity.this, R.string.auth_failed,
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }

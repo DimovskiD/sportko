@@ -1,12 +1,11 @@
 package com.dimovski.sportko.db.dao;
 
-import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Delete;
-import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.Query;
+import android.arch.persistence.room.*;
 import com.dimovski.sportko.db.model.User;
 
 import java.util.List;
+
+/**Data Access Object for Users - Used for local @{@link RoomDatabase}*/
 
 @Dao
 public interface UserDao {

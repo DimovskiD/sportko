@@ -10,6 +10,7 @@ import com.dimovski.sportko.db.converter.Converters;
 import java.util.ArrayList;
 import java.util.Date;
 
+/** POJO class for storing events in database*/
 @Entity(tableName = "events")
 @TypeConverters(Converters.class)
 public class Event {

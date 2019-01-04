@@ -14,6 +14,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**Single implementation of local event database - Room database in particular*/
+
 public class LocalEventRepositoryImpl implements EventRepository {
 
     private EventDao eventDao;

@@ -2,6 +2,7 @@ package com.dimovski.sportko.data;
 
 import android.Manifest;
 
+/**Constants used throughout the app - used for consistency*/
 public class Constants {
 
     public static final String SHARED_PREF = "SharedPrefs";

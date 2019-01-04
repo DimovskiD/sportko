@@ -2,7 +2,8 @@ package com.dimovski.sportko.internal;
 
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
-public interface DynamicLinkListner {
+/**Interface that provides method of communication*/
+public interface DynamicLinkListener {
 
     void shortDynamicLinkCreated (ShortDynamicLink shortDynamicLink);
 }

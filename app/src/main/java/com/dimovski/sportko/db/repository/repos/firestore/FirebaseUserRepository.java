@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
+/**Single implementation of online user database - Firebase Firestore in particular*/
 public class FirebaseUserRepository {
 
     private static final String TAG = "FIREBASE_USER_REPO";

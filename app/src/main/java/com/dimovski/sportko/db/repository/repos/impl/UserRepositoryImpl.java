@@ -13,6 +13,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
+/**Implementation of user repository. Checks for logical conditions and calls the correct method to fetch data from online database or from local database*/
 public class UserRepositoryImpl implements UserRepository {
 
     private FirebaseUserRepository firebaseUserRepository = FirebaseUserRepository.getInstance();
@@ -39,7 +40,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (NetworkUtils.checkInternetConnection(BaseApp.getContext())) {
             firebaseUserRepository.upSertUser(entity);
         } else {
-            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet))); //TODO update user locally, push to sever later
+            EventBus.getDefault().post(new NoInternetConnectionEvent(BaseApp.getContext().getResources().getString(R.string.no_internet)));
         }
         return 0;
     }

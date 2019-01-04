@@ -28,8 +28,10 @@ import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.db.model.EventBuilder;
+import com.dimovski.sportko.db.model.LocationDetails;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.DynamicLinkListner;
+import com.dimovski.sportko.internal.DynamicLinkListener;
 import com.dimovski.sportko.internal.Mode;
 import com.dimovski.sportko.internal.NoInternetConnectionEvent;
 import com.dimovski.sportko.utils.DateTimeUtils;
@@ -62,11 +64,12 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 
-public class AddEventActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListner {
+/**Activity for adding or editing @{@link Event}*/
+public class AddEventActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListener {
 
 
-    Unbinder unbinder;
-    Repository repository = Repository.getInstance();
+    Unbinder unbinder; //used to keep a reference to the view binding and unbind the bound views before destroying the activity
+    Repository repository = Repository.getInstance(); //instance of the @Repository
 
 
     @BindView(R.id.input_event_title)
@@ -94,14 +97,14 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     private Date scheduled;
     private int photoResourceId;
-    ArrayAdapter<CharSequence> adapter;
-    SharedPreferences sharedPreferences;
+    private ArrayAdapter<CharSequence> adapter;
+    private SharedPreferences sharedPreferences;
     private Event event;
     private Mode mode;
     private double lat;
     private double lon;
     private SingleDateAndTimePickerDialog dateTimeDialog;
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
 
 
     @Override
@@ -113,11 +116,12 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         setListeners();
         setUpSpinner();
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREF, MODE_PRIVATE);
-        mode = Mode.CREATE;
-
+        mode = Mode.CREATE; //default mode is create, unless specified otherwise
 
     }
 
+    /**
+     * Sets up {@link android.view.View.OnClickListener} for the views that require on click actions*/
     private void setListeners() {
         createEvent.setOnClickListener(this);
         scheduledTime.setOnClickListener(this);
@@ -131,9 +135,12 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this); //register activity to listen for events on the EventBus
     }
 
+    /**Listens for a message on the eventbus of type @{@link Event}
+     * When such a message is posted on the @{@link EventBus}, this method will be called
+     * If an event is posted on the eventbus before opening this activity, that means the activity should switch to UPDATE mode and initialize the UI with the event details*/
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Event event) {
         this.event = event;
@@ -142,11 +149,17 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         initUi();
     }
 
+    /**Listens for a message on the eventbus of type @{@link NoInternetConnectionEvent}
+     * When such a message is posted on the @{@link EventBus}, this method will be called
+     * If a @{@link NoInternetConnectionEvent} is posted on the bus, this means that the application is not connected to the Internet and we should handle that and inform the user
+     * */
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(NoInternetConnectionEvent noInternetConnectionEvent) {
         Toast.makeText(this,noInternetConnectionEvent.getMessage(),Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Initializes the UI according to the selected mode*/
     private void initUi() {
         if (mode == Mode.UPDATE)
             fab_container.setVisibility(VISIBLE);
@@ -167,6 +180,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     }
 
 
+    /**Sets up the spinner for the dropdown menu*/
     private void setUpSpinner() {
         adapter = ArrayAdapter.createFromResource(this,
                 R.array.categories, android.R.layout.simple_spinner_item);
@@ -200,15 +214,18 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onStop() {
         super.onStop();
-        EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(this); //unregister from listening for changes on the event bus when the activity is being destroyed
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbinder.unbind();
+        unbinder.unbind(); //unbind the view references when the activity is destroyed
     }
 
+    /** Handles onClick events, based on the view that was clicked
+     * @param v - the view element that was clicked
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -235,6 +252,10 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    /**
+     * Show alert dilaog when users tries to delete the event, asking if the user is sure about this action
+     * If the user clicks yes, delete the event
+     * Else, dismiss the dialog*/
     private void deleteButtonClicked() {
         AlertDialog.Builder builder = new AlertDialog.Builder( this, android.R.style.Widget_Material_ButtonBar_AlertDialog)
                 .setTitle(getString(R.string.delete_event))
@@ -263,6 +284,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     }
 
+    /**Call the Google Places autocomplete API to get location based on user input*/
     private void callPlacesApi() {
         if (sharedPreferences.getBoolean(Constants.LOCATION,false)) {
             if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -283,6 +305,9 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
             } } else startAutoCompleteFragment(null);
     }
 
+    /**
+     * Starts the Google Places Autocomplete fragment
+     * @param location - current user location, if not null, used to show more relevant locations, according to this parameter*/
     private void startAutoCompleteFragment(Location location) {
         try {
             LatLngBounds bounds = null;
@@ -312,6 +337,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
 
     }
 
+    /**Handle click on the Create/Edit button*/
     private void crEditButtonClicked() {
         if (validateInput()) {
             long res = crEditEvent();
@@ -322,6 +348,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    /**Displays a DateTime picker that allows the user to select date and time of the event*/
     private void showDateTimePicker() {
         dateTimeDialog = new SingleDateAndTimePickerDialog.Builder(AddEventActivity.this)
                 .bottomSheet()
@@ -338,6 +365,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         dateTimeDialog.display();
     }
 
+    /**Handles back press action*/
     @Override
     public void onBackPressed() {
         if (dateTimeDialog!=null && dateTimeDialog.isDisplaying())
@@ -345,37 +373,38 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         else super.onBackPressed();
     }
 
+    /**Creates or edits the @{@link Event} based on the mode of the activity*/
     private long crEditEvent() {
         long res = 0;
         String createdBy = sharedPreferences.getString(Constants.EMAIL, "");
         Resources resources = getResources();
         Uri uri = PhotoUtils.getUriForId(resources, photoResourceId);
         Event e;
+        String city = LocationUtils.getCityForLocation(this,lat,lon);
+        EventBuilder builder = new EventBuilder()
+                .id(event != null ? event.getId() : "")
+                .title(title.getText().toString())
+                .description(description.getText().toString())
+                .created(Calendar.getInstance().getTime())
+                .scheduled(scheduled != null? scheduled : event.getScheduled())
+                .location(new LocationDetails(lat,lon,autoCompletePlaces.getText().toString(),city))
+                .imgSrc(uri.toString())
+                .maxAttendees(Integer.parseInt(maxAtendees.getText().toString()))
+                .typeOfEvent(categorySpinner.getSelectedItem().toString())
+                .createdBy(createdBy);
+        e = builder.createEvent();
+
         if (mode == Mode.CREATE) {
-            String city = LocationUtils.getCityForLocation(this,lat,lon);
-            e = new Event(title.getText().toString(), description.getText().toString(), Calendar.getInstance().getTime(), scheduled,
-                    lat, lon, autoCompletePlaces.getText().toString(), uri.toString(), Integer.parseInt(maxAtendees.getText().toString()),
-                    categorySpinner.getSelectedItem().toString(), createdBy, city);
             res = repository.insertEvent(e);
         } else {
-            event.setTitle(title.getText().toString());
-            event.setDescription(description.getText().toString());
-            if (scheduled != null)
-                event.setScheduled(scheduled);
-            event.setTypeOfEvent(categorySpinner.getSelectedItem().toString());
-            event.setImgSrc(uri.toString());
-            event.setLat(lat);
-            event.setLon(lon);
-            event.setLocationName(autoCompletePlaces.getText().toString());
-            String maxAtt = maxAtendees.getText().toString();
-            Log.i("MAX_ATT", maxAtt);
-            event.setMaxAttendees(Integer.parseInt(maxAtt));
-            res = repository.updateEvent(event);
+            res = repository.updateEvent(e);
         }
         return res;
 
     }
 
+    /**Validates user input, checks for empty fields
+     * @return true if all inputs are valid, false if some input is invalid*/
     private boolean validateInput() {
         boolean valid = true;
         if (title.getText() == null || title.getText().toString().equals("")) {
@@ -406,6 +435,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         return valid;
     }
 
+    /**Awaits the response of Places Autocomplete and handles it*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -432,6 +462,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    /**Called when asking for permissions. Lets us know if the permissions have been granted or rejected*/
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -458,6 +489,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    /**Shows progress dialog while loading info*/
     private void showProgressDialog() {
         if (progressDialog==null)
             progressDialog = new ProgressDialog(this);
@@ -466,6 +498,7 @@ public class AddEventActivity extends BaseActivity implements View.OnClickListen
         progressDialog.show();
     }
 
+    /**Implementation of @{@link ShortDynamicLink}*/
     @Override
     public void shortDynamicLinkCreated(ShortDynamicLink shortDynamicLink) {
         if (progressDialog!=null && progressDialog.isShowing()) progressDialog.hide();

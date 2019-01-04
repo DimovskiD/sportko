@@ -9,11 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import com.dimovski.sportko.R;
-import com.dimovski.sportko.adapter.AttendeeListAdapter;
+import com.dimovski.sportko.adapter.attendee.AttendeeListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**Dialog that shows the users attending the event*/
 public class AttendeesDialog extends DialogFragment {
 
 

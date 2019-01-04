@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * ViewModel for fetching events from the repository
+ * Each method returns LiveData, which, when observed, updates the listeners with new events as they are created/changed
+ * Used by @{@link com.dimovski.sportko.ui.ListActivity}*/
 public class EventViewModel extends ViewModel {
 
     private Repository repository = Repository.getInstance();

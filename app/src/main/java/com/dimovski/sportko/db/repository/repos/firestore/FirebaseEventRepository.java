@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 import java.util.List;
 
+/**Single implementation of online event database - Firebase Firestore in particular*/
 public class FirebaseEventRepository {
 
     private static final String TAG = "FIREBASE_EVENT_REPO";

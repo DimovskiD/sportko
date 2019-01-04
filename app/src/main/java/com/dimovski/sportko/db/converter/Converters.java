@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**Used for type conversion when saving data in local database*/
 public class Converters {
     @TypeConverter
     public static Date fromTimestamp(Long value) {

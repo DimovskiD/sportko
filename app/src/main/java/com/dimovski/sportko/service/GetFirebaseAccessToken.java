@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+/**Service that returns the messaging token for Firebase Cloud messaging */
 public class GetFirebaseAccessToken extends AsyncTask<Void,Void,String> {
 
 

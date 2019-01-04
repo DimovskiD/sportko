@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 
 import java.util.List;
 
+/**Signature interface for basic CRUD operations that all implementations of the repository should implement*/
 public interface Repository<T> {
 
     long insert(T entity);

@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 import com.dimovski.sportko.data.Constants;
 
+/**
+ * Root activity for all other activities.
+ * Provides navigation methods throughout the app*/
 public class BaseActivity  extends AppCompatActivity {
 
     @Override
@@ -44,6 +47,17 @@ public class BaseActivity  extends AppCompatActivity {
         startActivity.putExtra(Constants.EVENT_ID,eventId);
         startActivity(startActivity);
         this.finish();
+    }
+
+
+    protected void startSettingsActivity() {
+        Intent i = new Intent(this,SettingsActivity.class);
+        startActivity(i);
+    }
+
+    protected void startCreateNewActivity() {
+        Intent i = new Intent(this,AddEventActivity.class);
+        startActivity(i);
     }
 
 }

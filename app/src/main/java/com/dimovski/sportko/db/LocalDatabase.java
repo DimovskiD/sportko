@@ -10,6 +10,7 @@ import com.dimovski.sportko.db.dao.UserDao;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.model.User;
 
+/**Singleton instance of local database*/
 @Database(entities = {Event.class, User.class}, version = 1, exportSchema = false)
 public abstract class LocalDatabase extends RoomDatabase {
 

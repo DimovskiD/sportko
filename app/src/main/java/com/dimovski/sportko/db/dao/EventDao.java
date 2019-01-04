@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**Data Access Object for Events - Used for local @{@link RoomDatabase}*/
 @Dao
 public interface EventDao {
 

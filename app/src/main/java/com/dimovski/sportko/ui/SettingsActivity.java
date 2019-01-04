@@ -26,6 +26,7 @@ import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.Repository;
 
+/**Activity that handles the user settings*/
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
     @BindView(R.id.input_username)
@@ -128,16 +129,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1]== PackageManager.PERMISSION_GRANTED) {
-//                    FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-//                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//                        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-//                            @Override
-//                            public void onSuccess(Location location) {
-//                                startAutoCompleteFragment(location);
-//                            }
-//                        }); todo use location to tailor results
-//
-//                    }
+
                     switchCompat.setChecked(true);
                     sharedPreferences.edit().putBoolean(Constants.LOCATION,true).apply();
                 } else {

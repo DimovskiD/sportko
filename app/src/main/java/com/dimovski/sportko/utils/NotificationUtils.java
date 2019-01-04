@@ -19,9 +19,17 @@ import com.dimovski.sportko.ui.EventDetailActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
 
+/**
+ *Utility class for notifications*/
 public class NotificationUtils {
 
-    public static void sendNotification(RemoteMessage.Notification notification, String title, String desc, String eventJson){
+    /**
+     * Builds and sends notification with provided
+     * @param title - title of notification
+     * @param desc - description of notification
+     * @param eventJson - @{@link com.dimovski.sportko.db.model.Event} in JSON format*
+     */
+    public static void sendNotification(String title, String desc, String eventJson){
 
         Context context =BaseApp.getContext();
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

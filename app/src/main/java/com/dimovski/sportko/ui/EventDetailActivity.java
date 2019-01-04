@@ -19,19 +19,18 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.bumptech.glide.Glide;
 import com.dimovski.sportko.R;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
 import com.dimovski.sportko.db.model.User;
 import com.dimovski.sportko.db.repository.Repository;
-import com.dimovski.sportko.internal.DynamicLinkListner;
+import com.dimovski.sportko.internal.DynamicLinkListener;
 import com.dimovski.sportko.ui.dialog.AttendeesDialog;
 import com.dimovski.sportko.utils.DateTimeUtils;
 import com.dimovski.sportko.utils.FirebaseUtils;
 import com.dimovski.sportko.viewmodel.EventDetailViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
@@ -41,7 +40,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class EventDetailActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListner {
+/**Activity that displays event details of an @{@link Event} that is not created by the current user*/
+public class EventDetailActivity extends BaseActivity implements View.OnClickListener, DynamicLinkListener {
 
     Unbinder unbinder;
     Repository repository = Repository.getInstance();
@@ -111,6 +111,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
     }
 
+
     private void handleDynamicLink() {
         FirebaseDynamicLinks.getInstance()
                 .getDynamicLink(getIntent())
@@ -122,7 +123,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         if (pendingDynamicLinkData != null) {
                             deepLink = pendingDynamicLinkData.getLink();
                             eventId = deepLink.getQueryParameter("id");
-                            if (FirebaseAuth.getInstance().getCurrentUser()!=null)
+                            if (FirebaseAuthentication.getInstance().getCurrentUser()!=null)
                                 setUpObserver();
                             else {
                                 startLoginActivity(eventId);
@@ -166,6 +167,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         eventId = event.getId();
     }
 
+    /**Sets up observer on the event that the user is currently viewing, changes the ui if there are any changes*/
     private void setUpObserver() {
         viewModel.getEvent(eventId).observe(this, new Observer<Event>() {
             @Override
@@ -208,6 +210,10 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         EventBus.getDefault().unregister(this);
     }
 
+    /**Awaits for the @{@link Event} posted on the @{@link EventBus} by @{@link ListActivity}*
+     * Acts accordingly when there is such an event, by initializing the UI with its details
+     */
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Event event) {
         this.event = event;
@@ -224,15 +230,14 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 //        initUi(event);
     }
 
+    /**Listens for @{@link User} message, which is sent by @{@link Repository}'s getUser method*/
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onMessageEvent(User user) {
         createdBy.setText(String.format("%s %s", getString(R.string.created_by), user.getUsername()));
     }
 
-
-
-
-
+    /**Initializes the UI with the details of the event
+     * @param event - event which details we are displaying in this activity*/
     private void initUi(Event event) {
         this.event=event;
         title.setText(event.getTitle());
@@ -251,6 +256,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
     }
 
+    /** Handles button visibility depending on the user's attendance to this event*/
     private void setAttending(boolean shouldAttend) {
             if (shouldAttend) {
                 attendingEvent.setVisibility(View.VISIBLE);
@@ -324,6 +330,9 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         progressDialog.show();
     }
 
+    /**Implementation of @{@link DynamicLinkListener}
+     * Called when the dynamic link has been shortened
+     * @param shortDynamicLink - the generated @{@link ShortDynamicLink}*/
     @Override
     public void shortDynamicLinkCreated(ShortDynamicLink shortDynamicLink) {
         if (progressDialog!=null && progressDialog.isShowing()) progressDialog.hide();

@@ -1,5 +1,6 @@
 package com.dimovski.sportko.rest;
 
+/**Model class for API response*/
 public class SendMessageResponse {
     String response;
 

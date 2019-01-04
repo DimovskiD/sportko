@@ -7,6 +7,8 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
+/**Service that receives Firebase Cloud Messages
+ * Called if the app is in foreground when the message is received, and handles it*/
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
 
     private static String TAG = "FBMS";
@@ -21,7 +23,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         if (data!=null)
             event = (String) data.get(Constants.EVENT);
 
-        NotificationUtils.sendNotification(remoteMessage.getNotification(),remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody(),event);
+        NotificationUtils.sendNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody(),event);
     }
 
 }

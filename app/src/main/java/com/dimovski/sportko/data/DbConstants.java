@@ -1,5 +1,6 @@
 package com.dimovski.sportko.data;
 
+/**Constants used for database tables and fields*/
 public class DbConstants {
 
     public static final String USERS = "users";

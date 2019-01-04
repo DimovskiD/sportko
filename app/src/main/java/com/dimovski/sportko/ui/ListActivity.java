@@ -15,7 +15,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,18 +29,22 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.dimovski.sportko.R;
-import com.dimovski.sportko.adapter.EventAdapter;
+import com.dimovski.sportko.adapter.event.EventAdapter;
 import com.dimovski.sportko.adapter.ItemClickHandler;
+import com.dimovski.sportko.auth.FirebaseAuthentication;
 import com.dimovski.sportko.data.Constants;
 import com.dimovski.sportko.db.model.Event;
+import com.dimovski.sportko.auth.Authentication;
 import com.dimovski.sportko.internal.DrawerItem;
 import com.dimovski.sportko.utils.NetworkUtils;
 import com.dimovski.sportko.viewmodel.EventViewModel;
-import com.google.firebase.auth.FirebaseAuth;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-public class ListActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
+
+/**Shows a list of events that are interesting to the user*/
+public class ListActivity extends BaseActivity implements  NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, ItemClickHandler {
 
     Unbinder unbinder;
     EventViewModel viewModel;
@@ -50,6 +53,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
     SharedPreferences sharedPreferences;
     String currentUser;
     String currentQuery="";
+    Authentication auth;
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -102,8 +106,12 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
             showSnackbar();
         }
         setListeners();
+
+        auth = FirebaseAuthentication.getInstance();
     }
 
+    /**Updates the existing observers in accordance to which category the user has selected
+     * */
     private void updateObservers() {
         try {
         if (selectedItem == DrawerItem.LIST_EVENTS){
@@ -176,14 +184,17 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         return super.onOptionsItemSelected(item);
     }
 
+    /**Handles side navigation
+     * @param menuItem - the item of the side navigation that has been clicked
+     * */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         checkItem(menuItem);
         switch (menuItem.getItemId()) {
             case R.id.logOut:
-                FirebaseAuth.getInstance().signOut();
+                auth.signOut();
                 clearPreferences();
-                navigateToLoginActivity();
+                startLoginActivity();
                 break;
             case R.id.List:
                 selectedItem = DrawerItem.LIST_EVENTS;
@@ -238,10 +249,6 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         editor.apply();
     }
 
-    private void startSettingsActivity() {
-        Intent i = new Intent(this,SettingsActivity.class);
-        startActivity(i);
-    }
 
     @Override
     public void onClick(View v) {
@@ -252,19 +259,14 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         }
     }
 
-    private void navigateToLoginActivity() {
-        Intent i = new Intent(this,LoginActivity.class);
-        startActivity(i);
-        this.finish();
-    }
 
-    private void startCreateNewActivity() {
-        Intent i = new Intent(this,AddEventActivity.class);
-        startActivity(i);
-    }
-
+    /**Called when there was a click on some of the events on the list
+     * @param event - event that was clicked on
+     * Starts @{@link AddEventActivity} or @{@link EventDetailActivity}, depending on the fact if the user has created the event in question, or not
+     * If the user is the creator, we are opening the @{@link AddEventActivity}, which will be in UPDATE mode because we post the event in question on the EventBus, which is handled in @{@link AddEventActivity}
+     * Else, we open the @{@link EventDetailActivity} and post the event on the event bus, so the @{@link EventDetailActivity} can fill the UI with the details of the event*/
     @Override
-    public void itemClicked(Event event) {
+    public void eventClicked(Event event) {
         Intent i;
         if (event.getCreatedBy().equals(currentUser)) i = new Intent(this, AddEventActivity.class);
         else i = new Intent(this, EventDetailActivity.class);
@@ -272,6 +274,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         EventBus.getDefault().postSticky(event);
     }
 
+    /**Sets up listeners*/
     private void setListeners() {
         fab.setOnClickListener(this);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -303,6 +306,7 @@ public class ListActivity extends AppCompatActivity implements  NavigationView.O
         });
     }
 
+    /**Sets up observers an actions on observer update*/
     private void setObserver() {
         eventObserver = new Observer<List<Event>>() {
             @Override

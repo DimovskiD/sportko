@@ -16,6 +16,7 @@ import java.util.List;
 import static com.dimovski.sportko.BaseApp.getContext;
 import static com.dimovski.sportko.utils.NetworkUtils.checkInternetConnection;
 
+/**Implementation of event repository. Checks for logical conditions and calls the correct method to fetch data from online database or from local database*/
 public class EventRepositoryImpl implements EventRepository {
 
     private FirebaseEventRepository firebaseEventRepository = FirebaseEventRepository.getInstance();
