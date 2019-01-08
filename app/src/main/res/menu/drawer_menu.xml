@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/list_group">
+        <item android:title="Upcoming"
+                android:id="@+id/List" />
+
+        <item android:title="My Events"
+              android:id="@+id/myEvents" />
+
+    </group>
+
+    <group android:id="@+id/list_settings">
+        <item android:id="@+id/settings"
+              android:title="Settings"/>
+        <item android:id="@+id/logOut"
+              android:title="Log Out" />
+    </group>
+
+</menu>

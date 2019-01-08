@@ -3,23 +3,65 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.dimovski.sportko">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
+            android:name=".BaseApp"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.StartActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+        <activity android:name=".ui.LoginActivity">
         </activity>
         <activity android:name=".ui.RegisterActivity">
         </activity>
+        <activity android:name=".ui.ListActivity">
+        </activity>
+        <activity
+                android:name=".ui.AddEventActivity"
+                android:label="@string/title_activity_add_event">
+        </activity>
+        <activity android:name=".ui.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.EventDetailActivity"
+        android:parentActivityName=".ui.ListActivity">
+            <intent-filter>
+                <action android:name="DETAIL_ACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="sportko573477588.wordpress.com"
+                      android:scheme="https"/>
+
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.SettingsActivity"
+                  android:parentActivityName=".ui.ListActivity"
+        />
+
+        <service android:name="com.dimovski.sportko.service.FirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel"
+                android:value="FIREBASE_FCM"/>
+
+        <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyBEUPt_esTuoXoR8ahOaZ3P7yx4cDb79Ps"/>
+
     </application>
 
 </manifest>
